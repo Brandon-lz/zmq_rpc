@@ -1,0 +1,5 @@
+{
+    "proxy_host": "10.10.21.236",
+    "in_proxy_port": "5555",
+    "out_proxy_port": "5556"
+}
