@@ -80,6 +80,13 @@ class ZMQClient():
         except:
             pass
     
+    def reconnect(self):
+        self.context = zmq.Context()
+        # Connecting to server
+        self.client:zmq.sugar.socket.Socket = self.context.socket(zmq.REQ)
+        self.client.connect(self.SERVER_ENDPOINT)
+        
+    
     def request(self,action:str,path=None,rqargs:dict={}):
         '''
         params:
