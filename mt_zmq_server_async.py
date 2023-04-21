@@ -3,7 +3,7 @@
  * @Date: 2022-11-07 23:50:43 
  * @Last Modified by:   wl.liuzhao 
  * @Last Modified time: 2022-11-07 23:50:43 
-
+ * 异步zmq-server,可以在同步环境下直接调用
 '''
 
 
@@ -47,6 +47,7 @@ class Response():
 
 
 
+
 class WorkerThread(Thread):
     def __init__(self, identity:int,views:list,worker_url:str,queue=None) -> None:
         super().__init__()
@@ -78,69 +79,63 @@ class WorkerThread(Thread):
         socket.connect(self.worker_url)
         # Tell the broker we are ready for work
         socket.send(b"READY")
-
         # 接收并返回结果
         try:
             while True:
-
                 address, empty, request = socket.recv_multipart()
                 # request:bytes
-               
                 try:
                     request = json.loads(request.decode('utf8'))
                 except Exception as err:
                     logger.info("json.loads(request) ERROR: "+str(err))
                     socket.send_multipart([address, b'', str(err).encode('utf8')])     # response
                     continue
-                
                 # 访问日志 请求日志
-                logger.info("%s: %s\n" % (socket.identity.decode('ascii'),
-                                    str(request)))
+                logger.info(f"{socket.identity.decode('ascii')}: request: {str(request)}" )
                
                 # views
                 response = self.run_views(request)
-                # 记录返回结果
+                
+                 # 记录response
                 if response.get('zmqsuccess'):
-                    logger.info(str(response))
+                    logger.info(f'{socket.identity} response:'+str(response))
                 else:
-                    logger.error(str(response))
-                                
+                    logger.error(f'{socket.identity} response:'+str(response))
+                    
+                # logger.error(str(response))
+                    
                 response = json.dumps(response).encode('utf8')
-                socket.send_multipart([address, b'', response])     # response
+                socket.send_multipart([address, b'', response])      # response
 
         except zmq.ContextTerminated:
             # context terminated so quit silently
             return
     
-    def run_views(self,message) -> dict:
+    def run_views(self,message)->dict:
         #  Wait for next request from client
         try:
             ret = self.router(message)
-            # response = Response()
             
         # 服务端错误，自定义视图异常继承
         except ServerBaseException as e:
-            return({'Status':e.Status,'ErrorInfo':e.ErrorInfo})    
-            # response = Response(e.Status,e.ErrorInfo)
-            # logger.error(f"response:  :{response.Status} [ {response.ErrorInfo} ]")
+            error_json = ({'Status':e.Status,'ErrorInfo':e.ErrorInfo})    
+            logger.error(f"response:  :{error_json}{e=} ]")
+            return error_json
 
         # 客户端的错误
         except ClientBaseException as e:
-            return({'Status':e.Status,'ErrorInfo':e.ErrorInfo})    
-            # response = Response(e.Status,e.ErrorInfo)
-            # logger.error(f"response:  :{response.Status} [ {response.ErrorInfo} ]")
+            error_json = ({'Status':e.Status,'ErrorInfo':e.ErrorInfo})    
+            logger.error(f"response:  :{error_json}{e=} ]")
+            return error_json
+            
         
         
         except AssertionError as err:
-            # response = Response(504,'与plc设备通信异常，请重试')
-            # raise
-            return({'Status':response.Status,'ErrorInfo':response.ErrorInfo})    
-            logger.error(f"response:  :{response.Status} [ {response.ErrorInfo} ]")
+            error_json = {'Status':504,'ErrorInfo':'与plc设备通信异常，请重试'}
+            logger.error(f"response:  :{error_json}{err=}")
+            return error_json
         
-        # except AttributeError as e:
-        #     response = Response(400,f'未定义的视图函数({message["action"]})')
-        #     return({'Error':response.Status,'ErrorInfo':response.ErrorInfo})  
-        
+      
         except Exception as err:
             # response = Response(500,f'发生了未知问题[{type(err)}:{err.__str__()}]')
             response = Response(500,f'发生了未知问题[{type(err)=}:{err=}]')
@@ -151,7 +146,7 @@ class WorkerThread(Thread):
                 ret.update({'zmqsuccess':200})
                 return(ret)
             else:
-                return({'zmqsuccess':200,'response':ret})   # 应该只要这个
+                return({'zmqsuccess':200,'response':ret})  
 
             # if response.Status<300:
             #     logger.info(f"response: {message['remote_ip']}/{message['action']} :{response.Status}")
@@ -260,9 +255,9 @@ class LRUQueue(object):
             self.is_workers_ready = False
             self.frontend.stop_on_recv()
 
+import asyncio
 
-
-class MTZMQServer():
+class AsyncMTZMQServer():
     def __init__(self,port:int=6789,*,views:Optional[List[BaseView]]=BaseView(),thread_num=5,queue=None) -> None:
         if isinstance(views,BaseView):
             views = [views]
@@ -274,10 +269,9 @@ class MTZMQServer():
 
 
     def run(self,thread_num=None):
-        
         NBR_WORKERS = thread_num or self.thread_num
         
-        logger.info(f'ZMQServer UP at port:{self.port} {datetime.now()}')
+        logger.info(f'AsyncZMQServer UP at port:{self.port} {datetime.now()}')
         logger.info(f'listening request from clients ...')
 
 
@@ -292,16 +286,14 @@ class MTZMQServer():
         # create workers and clients threads
         for i in range(NBR_WORKERS):
             WorkerThread(i,views=self._views,worker_url=url_worker).start()
-
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
         # create queue with the sockets
         queue = LRUQueue(backend, frontend,thread_num=NBR_WORKERS)
-        
-        # import asyncio
-        # start reactor
-        # loop =  asyncio.new_event_loop()
-        # asyncio.set_event_loop(loop)
-        
         IOLoop.instance().start()
+        # 阻塞
 
 
 
@@ -332,6 +324,6 @@ if __name__ == '__main__':
             
         
     # 开启服务
-    mtserver = MTZMQServer(port=6781,views=DIPView())      # 可以传递多个视图函数
+    mtserver = AsyncMTZMQServer(port=6781,views=DIPView())      # 可以传递多个视图函数
     mtserver.run()
 

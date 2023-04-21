@@ -178,7 +178,7 @@ class SyncMTZMQServer():
 
 
     def run(self,thread_num=None):
-        logger.info(f'ZMQServer UP at port:{self.port} {datetime.now()}')
+        logger.info(f'ZMQServer UP at port:{self.port}\n {datetime.now()}')
         logger.info(f'listening request from clients ...')
         
         NBR_WORKERS = thread_num or self.thread_num

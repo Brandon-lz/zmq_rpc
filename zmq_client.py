@@ -29,13 +29,11 @@ class ReplyError(ServerBaseException):
     ErrorInfo:str = '服务器返回了一个错误'
     
     def __init__(self, response) -> None:
-        print((response))
         self.Status = response['Status']
         self.ErrorInfo = response['ErrorInfo']
         self.response = response
     
     def __str__(self) -> str:
-        # return super().__str__() + 'code:'+ str(self.Status) + f'response ：{self.response}' + str(self.ErrorInfo)
         return 'code:'+ str(self.Status) + f'response ：{self.response}' + str(self.ErrorInfo)
 
 
@@ -85,7 +83,6 @@ class ZMQClient():
         # Connecting to server
         self.client:zmq.sugar.socket.Socket = self.context.socket(zmq.REQ)
         self.client.connect(self.SERVER_ENDPOINT)
-        
     
     def request(self,action:str,path=None,rqargs:dict={}):
         '''
