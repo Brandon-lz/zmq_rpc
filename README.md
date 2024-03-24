@@ -53,6 +53,7 @@ if __name__ == '__main__':
 ```
 
 ### 客户端
+客户端自动发现异常并抛出，不需要判断返回的code是不是200，直接取出服务端的值，有异常使用try语句直接处理即可。
 
 ```python
 from zmq_lib import ZMQClient
