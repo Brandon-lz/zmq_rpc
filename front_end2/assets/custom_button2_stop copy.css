@@ -1,0 +1,56 @@
+.wrap {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stopbutton {
+    user-select: none;
+    text-align: center;
+    width: 300px;
+    height: 60px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    font-weight: 700;
+    color: #313133;
+    background: #ff3300;
+    /* background: linear-gradient(90deg, rgba(129, 230, 217, 1) 0%, rgba(79, 209, 197, 1) 100%); */
+    border: none;
+    border-radius: 1000px;
+    /* box-shadow: 12px 12px 24px rgb(255, 51, 0, .64); */
+    transition: all 0.3s ease-in-out 0s;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    padding: 10px;
+}
+
+stopbutton::before {
+    content: '';
+    border-radius: 1000px;
+    width: calc(300px + 18px);
+    height: calc(60px + 18px);
+    border: 6px solid rgb(189, 38, 0);
+    /* box-shadow: 0 0 60px rgb(255, 51, 0, .64); */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: all .3s ease-in-out 0s;
+}
+
+.stopbutton:hover,
+.stopbutton:focus {
+    color: #313133;
+    transform: translateY(-6px);
+}
+
+stopbutton:hover::before,
+stopbutton:focus::before {
+    opacity: 1;
+}
+

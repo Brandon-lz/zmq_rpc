@@ -1,0 +1,52 @@
+services:
+  db:
+    container_name: ninjinji-db
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    ports:
+      - "10000:8080"
+    environment:
+      - ADMINER_DESIGN=pepa-linha
+    restart: unless-stopped
+
+  # opcua:
+  #   container_name: opcua-middleware-app
+  #   image: opcua-middleware
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-opcua
+
+  #   ports:
+  #     - "9000:9000"
+  #   restart: unless-stopped
+
+  # 注意，每次重构的时候，都要把数据库里的	alembic_version	表清空一下，才能成功build
+  # app:
+  #   container_name: ninjinji-font-app
+  #   image: ninjinji-font
+  #   build:
+  #     context: .
+  #   # command: reflex db init && reflex db migrate && reflex run
+  #   ports:
+  #     - "3000:3000"
+  #     - "8000:8000"
+  #   restart: unless-stopped
+
+volumes:
+  postgres-data:
+
+    # networks:
+    #   ninjinji-network:
+    #     external: true
