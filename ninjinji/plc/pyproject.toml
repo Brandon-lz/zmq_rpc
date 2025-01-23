@@ -1,0 +1,13 @@
+[project]
+name = "plc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi==0.111.0",
+    "opcua==0.98.13",
+    "toml==0.10.2",
+    "uvicorn[standard]>=0.34.0",
+    "websockets==12.0",
+]

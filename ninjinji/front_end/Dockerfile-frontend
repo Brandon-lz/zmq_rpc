@@ -1,0 +1,24 @@
+# Use a Python image with uv pre-installed
+FROM debian
+
+# 先执行
+# reflex export
+# unzip frontend.zip -d frontend
+# docker build . -f Dockerfile-frontend -t frontend
+
+# Install the project into `/app`
+WORKDIR /app
+
+
+# Then, add the rest of the project source code and install it
+# Installing separately from its dependencies allows optimal layer caching
+COPY frontend http_server ./
+
+EXPOSE 3000
+
+# Run the FastAPI application by default
+# Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
+# Uses `--host 0.0.0.0` to allow access from outside the container
+CMD ["./http_server","-p","3000"]
+
+# API_URL=http://localhost:8000 reflex export

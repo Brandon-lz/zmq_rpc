@@ -1,0 +1,13 @@
+[project]
+name = "front-end"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.3",
+    "pillow>=11.1.0",
+    "psycopg2-binary>=2.9.10",
+    "reflex==0.6.8",
+    "websocket-client>=1.8.0",
+]
