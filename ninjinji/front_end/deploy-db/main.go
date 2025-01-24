@@ -66,11 +66,11 @@ func main() {
 		panic(err)
 	}
 
-	err = db.Save(&User{ID: 1, Name: "admin", Password: "123456", WorkerId: "-1", ClassGroup: "-1", IsSuperuser: true, Created_at: time.Now()}).Error
+	err = db.Save(&User{Name: "admin", Password: "123456", WorkerId: "-1", ClassGroup: "-1", IsSuperuser: true, Created_at: time.Now()}).Error
 	if err != nil {
 		panic(err)
 	}
-	system := System{ID: 1, Version: "1.0.0", CreateAt: time.Now()}
+	system := System{Version: "1.0.0", CreateAt: time.Now()}
 	settings := make(map[string]interface{})
 	settings["open_log_record"] = true
 	d, err := json.Marshal(settings)
