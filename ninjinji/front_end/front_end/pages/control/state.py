@@ -71,12 +71,6 @@ class ControlState(rx.State):
     _n_tasks: int = 0
     _n_tasks_heart_beat: int = 0
 
-    @rx.var(cache=False)
-    def value(self)->str:
-        if self._value < 0:
-            return "断开"
-        return "正常"
-
     def _stop_update_value(self):
         with update_value_lock:
             if (
