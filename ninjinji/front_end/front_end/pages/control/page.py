@@ -111,6 +111,7 @@ def index() -> rx.Component:
                 min=0.0,
                 max=6000.0,
                 on_value_commit=SlidersState.set_torque,
+                # on_change=SlidersState.set_torque.throttle(6000),
                 on_mount=SlidersState.init_torque,
             ),
             min_width="30em",

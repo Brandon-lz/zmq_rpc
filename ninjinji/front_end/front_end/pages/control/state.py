@@ -1,4 +1,3 @@
-from websocket import WebSocket
 from .ws import send_ws_json, get_heart_beat_ws, get_jog_add_ws, get_jog_sub_ws
 from front_end.state import AppState
 import reflex as rx
@@ -33,7 +32,7 @@ class SlidersState(rx.State):
 
     @rx.var(cache=False)
     def get_torque(self) -> list[float]:
-        return [self.torque * 100.0]
+        return [self.torque]
 
     async def init_torque(self):
         try:
@@ -47,8 +46,8 @@ class SlidersState(rx.State):
         except Exception as e:
             print(f"Error setting torque: {e}")
 
+    @rx.event
     async def set_torque(self, value: list):
-        self.torque = value[0] / 100.0
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
@@ -61,6 +60,7 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
+            await self.init_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
 
