@@ -34,7 +34,16 @@ def index() -> rx.Component:
             right="0em",
             on_click=rx.redirect("/login"),
         ),
-        rx.moment(interval=1000, format="YYYY年MM月DD日 HH:mm:ss",position="fixed",top="0.1em",left="1em",font_weight="500"),
+        rx.moment(interval=1000, format="YYYY年MM月DD日 HH:mm:ss",position="fixed",top="0.1em",left="2em",font_weight="500"),
+        rx.hstack(
+            rx.heading("PLC连接: ",size="2"),
+            rx.cond(
+                ControlState.plc_ok,
+                rx.avatar(fallback="正常", color_scheme="indigo"),
+                rx.avatar(fallback="断开", color_scheme="crimson"),
+            ),
+            align="center",
+        ),
         rx.flex(
             rx.spacer(),
             rx.vstack(
@@ -89,22 +98,11 @@ def index() -> rx.Component:
         #         on_click=torque_chart.TorqueChartState.clear_data,
         #     ),
         # ),
+       
         rx.hstack(
-            rx.heading("PLC连接: ",size="2"),
-            rx.cond(
-                ControlState.plc_ok,
-                rx.avatar(fallback="正常", color_scheme="indigo"),
-                rx.avatar(fallback="断开", color_scheme="crimson"),
-            ),
-            align="center",
-        ),
-        rx.vstack(
-            rx.hstack(
-                rx.heading(f"设置最大扭矩: "),
-                rx.avatar(fallback=f"{SlidersState.torque}"),
-                rx.heading(f"N.m"),
-                align="center",
-            ),
+            rx.heading(f"设置最大扭矩: ",size="4",width="200px"),
+            rx.avatar(fallback=f"{SlidersState.torque}"),
+            rx.heading(f"N.m",size="4"),
             rx.slider(
                 default_value=SlidersState.get_torque,
                 # value=SlidersState.get_torque,
@@ -114,8 +112,10 @@ def index() -> rx.Component:
                 # on_change=SlidersState.set_torque.throttle(6000),
                 on_mount=SlidersState.init_torque,
             ),
-            min_width="30em",
+            min_width = "600px",
+            align="center",
         ),
+        rx.spacer(),
         rx.center(
             custom_button.create_start_button(
                 StartButtonState.pressed,
@@ -148,6 +148,7 @@ def index() -> rx.Component:
             # justify="center",
             width="100%",
         ),
+        rx.spacer(),
         # rx.box(height="5em"),
         # rx.box("hello", id="text1"),
         # rx.vstack(
