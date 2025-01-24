@@ -44,7 +44,6 @@ class SlidersState(rx.State):
                 )
                 res.raise_for_status()
                 self.torque = float(res.json()["value"])
-                print(f"33333333333333SlidersState: {self.torque}")
         except Exception as e:
             print(f"Error setting torque: {e}")
 
@@ -67,15 +66,16 @@ class SlidersState(rx.State):
 
 
 class ControlState(rx.State):
-    _value: float = 0.0
+    plc_ok :bool = False
+    _value: int = 0
     _n_tasks: int = 0
     _n_tasks_heart_beat: int = 0
 
     @rx.var(cache=False)
     def value(self)->str:
-        if self._value < 0.0:
-            return "None"
-        return str(self._value)
+        if self._value < 0:
+            return "断开"
+        return "正常"
 
     def _stop_update_value(self):
         with update_value_lock:
@@ -112,11 +112,13 @@ class ControlState(rx.State):
                     )
                     res.raise_for_status()
                 async with self:
-                    self._value = float(res.json()["value"])
+                    self._value = int(res.json()["value"])
+                    self.plc_ok = True
                     print(f"ControlState: {self._value}")
             except Exception as e:
                 async with self:
-                    self._value = -1.0
+                    self._value = -1
+                    self.plc_ok = False
                 print(f"ControlState: Error getting value: {e}")
 
             await asyncio.sleep(1)
@@ -190,7 +192,7 @@ def included_angle(a, b) -> float:
 
 
 class ControlDashboardState(rx.State):
-    count: float = 0.0
+    actual_torque: float = 0.0
     _couts: list = [1.0, 1.0, 1.0, 1.0, 1.0]
     _runing: bool = False
 
@@ -228,14 +230,15 @@ class ControlDashboardState(rx.State):
                     )
                     res.raise_for_status()
                 async with self:
-                    self.count = float(res.json()["value"]) + 1.0
-                    self._couts.append(self.count)
+                    # self.actual_torque = float(res.json()["value"]) + 1.0
+                    self.actual_torque = float(res.json()["value"])
+                    self._couts.append(self.actual_torque)
                     self._couts.pop(0)
-                    self.count = sum(self._couts) / len(self._couts)
+                    self.actual_torque = sum(self._couts) / len(self._couts)
                     # print(f"ControlState: {self.count}")
             except Exception as e:
                 async with self:
-                    self.count = -1.0
+                    self.actual_torque = -1.0
                 print(f"ControlState: Error getting value: {e}")
 
             await asyncio.sleep(0.2)
@@ -258,12 +261,12 @@ class ControlDashboardState(rx.State):
                 # Check for stopping conditions inside context
                 if not self._runing:
                     return
-                if self.count >= self.scope_max:
-                    self.count = self.scope_max
+                if self.actual_torque >= self.scope_max:
+                    self.actual_torque = self.scope_max
                     self._runing = False
                     return
 
-                self.count += 1
+                self.actual_torque += 1
 
             # Await long operations outside the context to avoid blocking UI
             await asyncio.sleep(0.01)
@@ -286,12 +289,12 @@ class ControlDashboardState(rx.State):
                 # Check for stopping conditions inside context
                 if not self._runing:
                     return
-                if self.count <= self.scope_min:
-                    self.count = self.scope_min
+                if self.actual_torque <= self.scope_min:
+                    self.actual_torque = self.scope_min
                     self._runing = False
                     return
 
-                self.count -= 1
+                self.actual_torque -= 1
 
             # Await long operations outside the context to avoid blocking UI
             await asyncio.sleep(0.01)
@@ -302,7 +305,7 @@ class ControlDashboardState(rx.State):
 
     @rx.var(cache=False)
     def board_num(self)->str:
-        return f"{self.count} N•m"
+        return f"{self.actual_torque} N•m"
 
     def pin_angle(self) -> float:
 
@@ -320,9 +323,9 @@ class ControlDashboardState(rx.State):
         return res
 
     def calcu(self) -> float:
-        if self.count > self.scope_max or self.count < self.scope_min:
+        if self.actual_torque > self.scope_max or self.actual_torque < self.scope_min:
             return
-        self.degree = self.count / ((self.scope_max - self.scope_min) / 180)
+        self.degree = self.actual_torque / ((self.scope_max - self.scope_min) / 180)
         return self.degree
 
     @rx.var(cache=False)

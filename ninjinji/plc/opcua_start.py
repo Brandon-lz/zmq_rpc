@@ -35,6 +35,7 @@ period_client.register_opcvar(
     name="heartbeat",
 )
 
+)
 print(period_client["heartbeat"].get_value())
 
 period_client.register_opcvar(
@@ -43,7 +44,6 @@ period_client.register_opcvar(
         nodeid=config["nodes"]["node-start"]["node_id"],
     ),
     name="start",
-)
 
 
 period_client.register_opcvar(

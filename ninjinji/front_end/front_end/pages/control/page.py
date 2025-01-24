@@ -77,34 +77,39 @@ def index() -> rx.Component:
             width="100%",
         ),
         torque_chart.create_torque_chart(data=torque_chart.TorqueChartState.data),
+        # rx.hstack(
+        #     rx.button(
+        #         "曲线测试",
+        #         color_scheme="red",
+        #         on_click=torque_chart.TorqueChartState.change_data,
+        #     ),
+        #     rx.button(
+        #         "清空数据",
+        #         color_scheme="green",
+        #         on_click=torque_chart.TorqueChartState.clear_data,
+        #     ),
+        # ),
         rx.hstack(
-            rx.button(
-                "曲线测试",
-                color_scheme="red",
-                on_click=torque_chart.TorqueChartState.change_data,
+            rx.heading("PLC连接: ",size="2"),
+            rx.cond(
+                ControlState.plc_ok,
+                rx.avatar(fallback="正常", color_scheme="indigo"),
+                rx.avatar(fallback="断开", color_scheme="crimson"),
             ),
-            rx.button(
-                "清空数据",
-                color_scheme="green",
-                on_click=torque_chart.TorqueChartState.clear_data,
-            ),
-        ),
-        rx.box(
-            rx.heading(
-                f"plc心跳: {ControlState.value}",
-                on_mount=ControlState.update_value,
-            ),
-            # rx.heading(f"current value: {ControlState.value}",on_mount=ControlState.update_value),
-            # rx.button("start",on_click=ControlState.update_value),
-            height="5em",
+            align="center",
         ),
         rx.vstack(
-            rx.heading(f"设置扭矩: {SlidersState.torque} N.m"),
+            rx.hstack(
+                rx.heading(f"设置最大扭矩: "),
+                rx.avatar(fallback=f"{SlidersState.torque}"),
+                rx.heading(f"N.m"),
+                align="center",
+            ),
             rx.slider(
                 default_value=SlidersState.get_torque,
                 # value=SlidersState.get_torque,
                 min=0.0,
-                max=100.0,
+                max=6000.0,
                 on_value_commit=SlidersState.set_torque,
                 on_mount=SlidersState.init_torque,
             ),
