@@ -56,5 +56,3 @@ app.add_page(custom_sidebar.index, route="/custom_siderbar")
 from front_end.components.dashboard.page import index as dash
 
 app.add_page(dash, route="/dashboard/dash")
-
-# abc
