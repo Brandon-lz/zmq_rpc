@@ -467,10 +467,14 @@ class StopButtonState(rx.State):
     async def on_click(self):
         print("click stop-")
 
-        if self._running:
-            return
+        # if self._running:
+        #     return
         async with self:
-            self._running = True
+            startstate: StartButtonState = await self.get_state(StartButtonState)
+            startstate.start_button_text = "完成"
+            print(111111111)
+            startstate._runing = False
+            # self._running = True
 
         async with httpx.AsyncClient() as aclient:
             res = await aclient.put(
@@ -479,8 +483,8 @@ class StopButtonState(rx.State):
             res.raise_for_status()
 
         await asyncio.sleep(0.5)
-        async with self:
-            self._running = False
+        # async with self:
+        #     self._running = False
 
 
 class JogAddButtonState(rx.State):

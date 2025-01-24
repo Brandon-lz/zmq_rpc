@@ -32,7 +32,7 @@ def index() -> rx.Component:
             position="fixed",
             top="0em",
             right="0em",
-            on_click=rx.redirect("/"),
+            on_click=rx.redirect("/login"),
         ),
         rx.moment(interval=1000, format="YYYY年MM月DD日 HH:mm:ss",position="fixed",top="0.1em",left="1em",font_weight="500"),
         rx.flex(
