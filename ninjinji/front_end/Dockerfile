@@ -5,7 +5,8 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 # reflex export
 # unzip backend.zip -d backend
 # 修改文件front_end/rxconfig.py中的dbhost为docker环境的host（因为打包需要，暂时先设置了localhost）
-# docker build . -t backend
+# docker build --no-cache . -t backend
+
 
 # Install the project into `/app`
 WORKDIR /app

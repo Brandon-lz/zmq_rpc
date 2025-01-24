@@ -4,7 +4,7 @@ FROM debian
 # 先执行
 # reflex export
 # unzip frontend.zip -d frontend
-# docker build . -f Dockerfile-frontend -t frontend
+# docker build --no-cache . -f Dockerfile-frontend -t frontend
 
 # Install the project into `/app`
 WORKDIR /app
