@@ -39,7 +39,7 @@ def index() -> rx.Component:
             rx.heading("PLC连接: ",size="2"),
             rx.cond(
                 ControlState.plc_ok,
-                rx.avatar(fallback="正常", color_scheme="indigo"),
+                rx.avatar(fallback="正常", color_scheme="grass"),
                 rx.avatar(fallback="断开", color_scheme="crimson"),
             ),
             on_mount=ControlState.update_value,

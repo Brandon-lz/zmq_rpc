@@ -113,7 +113,7 @@ class ControlState(rx.State):
                 async with self:
                     self._value = -1
                     self.plc_ok = False
-                print(f"ControlState: Error getting value: {e}")
+                print(f"ControlState: Error getting heartbeat value: {e}")
 
             await asyncio.sleep(1)
 
@@ -233,7 +233,7 @@ class ControlDashboardState(rx.State):
             except Exception as e:
                 async with self:
                     self.actual_torque = -1.0
-                print(f"ControlState: Error getting value: {e}")
+                print(f"ControlState: Error getting torque_value value: {e}")
 
             await asyncio.sleep(0.2)
 
@@ -364,13 +364,13 @@ class StartButtonState(rx.State):
                 return "完成"
             return "开始"
 
-    @rx.var(cache=False)
-    def button_width(self)->str:
-        return f"{self.width}em"
+    # @rx.var(cache=False)
+    # def button_width(self)->str:
+    #     return f"{self.width}em"
 
-    @rx.var(cache=False)
-    def button_height(self)->str:
-        return f"{self.height}em"
+    # @rx.var(cache=False)
+    # def button_height(self)->str:
+    #     return f"{self.height}em"
 
     @rx.var(cache=False)
     def animation_background(self)->str:
