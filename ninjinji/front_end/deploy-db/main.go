@@ -70,6 +70,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	err = db.Save(&User{Name: "马金山", Password: "123456", WorkerId: "10001", ClassGroup: "1", IsSuperuser: false, Created_at: time.Now()}).Error
+	if err != nil {
+		panic(err)
+	}
 	system := System{Version: "1.0.0", CreateAt: time.Now()}
 	settings := make(map[string]interface{})
 	settings["open_log_record"] = true
