@@ -13,7 +13,7 @@ from front_end.pages import (
     login,
     # register,
     admin,
-    operate_log,
+    operate_log, 
     control,
     # control_test,
     dashboard,
