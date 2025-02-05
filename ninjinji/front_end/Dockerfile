@@ -14,7 +14,6 @@ WORKDIR /app
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
 
-ENV PYTHONUNBUFFERED 1
 
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
@@ -34,6 +33,8 @@ RUN --mount=type=cache,target=~/.cache/uv \
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
+
+ENV PYTHONUNBUFFERED 1
 
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
