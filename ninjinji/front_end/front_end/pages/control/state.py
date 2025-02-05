@@ -114,8 +114,14 @@ class ControlState(rx.State):
                     self._value = -1
                     self.plc_ok = False
                 print(f"ControlState: Error getting heartbeat value: {e}")
+                print(self.plc_ok)
 
             await asyncio.sleep(1)
+
+    
+    @rx.event
+    def changeplc_ok(self):
+        self.plc_ok = not (self.plc_ok)
 
     @rx.event(background=True)
     async def send_heart_beat(self):

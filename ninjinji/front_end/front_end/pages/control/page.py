@@ -37,11 +37,13 @@ def index() -> rx.Component:
         rx.moment(interval=1000, format="YYYY年MM月DD日 HH:mm:ss",position="fixed",top="0.1em",left="2em",font_weight="500"),
         rx.hstack(
             rx.heading("PLC连接: ",size="2"),
+            # rx.avatar(fallback=ControlState.plc_ok, color_scheme="grass"),
             rx.cond(
                 ControlState.plc_ok,
                 rx.avatar(fallback="正常", color_scheme="grass"),
                 rx.avatar(fallback="断开", color_scheme="crimson"),
             ),
+            rx.button("change",on_click=ControlState.changeplc_ok),
             on_mount=ControlState.update_value,
             align="center",
         ),
