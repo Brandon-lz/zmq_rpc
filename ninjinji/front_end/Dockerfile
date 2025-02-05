@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=~/.cache/uv \
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
