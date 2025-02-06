@@ -99,6 +99,7 @@ class ControlState(rx.State):
             if self._n_tasks == 0:
                 break
             try:
+                res = None
                 async with httpx.AsyncClient() as aclient:
                     res = await aclient.get(
                         f"http://{config['opcua-middleware']}/getvalue/heartbeat",
