@@ -14,7 +14,7 @@ func main() {
 	ticker := time.NewTicker(1 * time.Second)
 	for range ticker.C {
 		if checkServerIsOk() {
-			cmd := exec.Command("top")
+			cmd := exec.Command("google-chrome-stable --kiosk --noerrdialogs --start-fullscreen http://localhost:3000/")
 			s, err := cmd.Output()
 			if err !=nil{
 				panic(err)
