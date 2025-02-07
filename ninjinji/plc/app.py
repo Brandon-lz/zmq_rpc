@@ -110,6 +110,10 @@ async def websocket_endpoint(websocket: WebSocket):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("jog_add")
+    if dev_mode:
+        while True:
+            data = await websocket.receive_text()
+            print("jog add: ", data)
     try:
         jog_add = period_client["jog_add"]
         while True:
@@ -136,6 +140,10 @@ async def websocket_endpoint(websocket: WebSocket):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("jog_sub")
+    if dev_mode:
+        while True:
+            data = await websocket.receive_text()
+            print("jog sub: ", data)
     try:
         jog_add = period_client["jog_sub"]
         while True:
