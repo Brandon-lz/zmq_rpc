@@ -62,6 +62,7 @@ def index() -> rx.Component:
                         radius=10,
                         border_width=0.7,
                         pin_lenth=6,
+                        max_num=ControlDashboardState.scope_max,
                         pin_angle=ControlDashboardState.pin_angle_sytle,
                         color=ControlDashboardState.color,
                         board_num=ControlDashboardState.board_num,
@@ -89,18 +90,18 @@ def index() -> rx.Component:
             width="100%",
         ),
         torque_chart.create_torque_chart(data=torque_chart.TorqueChartState.data),
-        # rx.hstack(
-        #     rx.button(
-        #         "曲线测试",
-        #         color_scheme="red",
-        #         on_click=torque_chart.TorqueChartState.change_data,
-        #     ),
-        #     rx.button(
-        #         "清空数据",
-        #         color_scheme="green",
-        #         on_click=torque_chart.TorqueChartState.clear_data,
-        #     ),
-        # ),
+        rx.hstack(
+            rx.button(
+                "曲线测试",
+                color_scheme="red",
+                on_click=torque_chart.TorqueChartState.change_data,
+            ),
+            rx.button(
+                "清空数据",
+                color_scheme="green",
+                on_click=torque_chart.TorqueChartState.clear_data,
+            ),
+        ),
        
         rx.hstack(
             rx.heading(f"设置最大扭矩: ",size="4",width="200px"),

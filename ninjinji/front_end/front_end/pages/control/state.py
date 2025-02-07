@@ -420,7 +420,7 @@ class StartButtonState(rx.State):
         persent = self.process_count / (self.process_max - self.process_min) * 1.5
         # if persent>=0.7:
         # persent = persent+(persent-persent*0.7)*1.5
-        return f"linear-gradient(90deg, #a6fc06 0%, rgba(79, 209, 197, 1) {persent*6000.0}%);"
+        return f"linear-gradient(90deg, #a6fc06 0%, rgba(79, 209, 197, 1) {persent*self.process_max}%);"
 
     @rx.event(background=True)
     async def on_click(self):
