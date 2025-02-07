@@ -44,7 +44,7 @@ def index() -> rx.Component:
                 rx.avatar(fallback="断开", color_scheme="crimson"),
             ),
             # rx.button("change",on_click=ControlState.changeplc_ok),
-            on_mount=ControlState.update_value,
+            on_mount=ControlState.update_heartbeat_value,
             align="center",
         ),
         rx.flex(
@@ -113,7 +113,7 @@ def index() -> rx.Component:
                 max=6000.0,
                 on_value_commit=SlidersState.set_torque,
                 # on_change=SlidersState.set_torque.throttle(6000),
-                on_mount=SlidersState.init_torque,
+                # on_mount=SlidersState.init_torque,
             ),
             min_width = "600px",
             align="center",

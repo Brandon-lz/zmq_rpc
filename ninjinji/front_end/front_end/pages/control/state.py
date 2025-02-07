@@ -5,6 +5,7 @@ import asyncio
 import json
 import httpx
 import time
+import requests
 
 
 import math
@@ -32,20 +33,31 @@ set_torque_lock = {"running": False}
 
 class SlidersState(rx.State):
     torque: float = 0.7
+    first:bool = True
 
-    @rx.var(cache=False)
+    @rx.var(cache=True)
     def get_torque(self) -> list[float]:
+        if self.first:
+            self.init_torque()
+            self.first = False
         return [self.torque]
 
-    async def init_torque(self):
+    def init_torque(self):
         try:
-            async with httpx.AsyncClient() as aclient:
-                res = await aclient.get(
-                    f"http://{config['opcua-middleware']}/getvalue/aim_torque",
-                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
-                )
-                res.raise_for_status()
-                self.torque = float(res.json()["value"])
+            res = requests.get(
+                f"http://{config['opcua-middleware']}/getvalue/aim_torque",
+                headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+            )
+            res.raise_for_status()
+            self.torque = float(res.json()["value"])
+
+            # async with httpx.AsyncClient() as aclient:
+            #     res = await aclient.get(
+            #         f"http://{config['opcua-middleware']}/getvalue/aim_torque",
+            #         headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+            #     )
+            #     res.raise_for_status()
+            #     self.torque = float(res.json()["value"])
         except Exception as e:
             print(f"Error getting torque: {e}")
 
@@ -88,7 +100,7 @@ class ControlState(rx.State):
         self._n_tasks = 0
 
     @rx.event(background=True)
-    async def update_value(self):
+    async def update_heartbeat_value(self):
         async with self:  # 这是一个锁，不要在这里面sleep
             with update_value_lock:
                 update_value_running["time"] = time.time()
