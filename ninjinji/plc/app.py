@@ -16,7 +16,7 @@ class TestValue:
     heartbeat:int = 0
 
     def get_torque_value(self)->float:
-        return float(random.randint(0,10000))/10.0 
+        return float(random.randint(0,60000))/10.0 
 
 testvalue = TestValue()
 app = FastAPI()

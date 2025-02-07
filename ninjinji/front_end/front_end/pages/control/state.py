@@ -211,7 +211,7 @@ class ControlDashboardState(rx.State):
 
     radius: float = 10.0
     scope_min: float = 0.0
-    scope_max: float = 100.0
+    scope_max: float = 6000.0
     degree: float = 90.0
 
     # def set_degree(self, value: int):
@@ -420,7 +420,7 @@ class StartButtonState(rx.State):
         persent = self.process_count / (self.process_max - self.process_min) * 1.5
         # if persent>=0.7:
         # persent = persent+(persent-persent*0.7)*1.5
-        return f"linear-gradient(90deg, #a6fc06 0%, rgba(79, 209, 197, 1) {persent*100.0}%);"
+        return f"linear-gradient(90deg, #a6fc06 0%, rgba(79, 209, 197, 1) {persent*6000.0}%);"
 
     @rx.event(background=True)
     async def on_click(self):
