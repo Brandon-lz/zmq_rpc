@@ -27,6 +27,9 @@ update_torque_lock = Lock()
 update_torque_running = {"running": False, "time": 0.0}
 
 
+set_torque_lock = {"running": False}
+
+
 class SlidersState(rx.State):
     torque: float = 0.7
 
@@ -44,10 +47,11 @@ class SlidersState(rx.State):
                 res.raise_for_status()
                 self.torque = float(res.json()["value"])
         except Exception as e:
-            print(f"Error setting torque: {e}")
+            print(f"Error getting torque: {e}")
 
     @rx.event
     async def set_torque(self, value: list):
+        set_torque_lock['running'] = True
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
@@ -63,6 +67,7 @@ class SlidersState(rx.State):
             await self.init_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
+        set_torque_lock["running"] = False
 
 
 class ControlState(rx.State):
@@ -177,9 +182,12 @@ class ControlState(rx.State):
         print("Stopping stop_send_heart_beat...")
         self._n_tasks_heart_beat = 0
 
-    def quit_page(self):
+    @rx.event
+    async def quit_page(self):
         self._stop_send_heart_beat()
         self._stop_update_value()
+        controldashboardstate:ControlDashboardState = await self.get_state(ControlDashboardState)
+        controldashboardstate.stop_update()
 
 
 def included_angle(a, b) -> float:
@@ -207,6 +215,18 @@ class ControlDashboardState(rx.State):
 
     _n_tasks: int = 0
 
+
+    def stop_update(self):
+        with update_torque_lock:
+            if (
+                update_torque_running["running"]
+                and time.time() - update_torque_running["time"] < 2.0
+            ):  # to fix unmount bug
+                return
+            update_torque_running["running"] = False
+        print("Stopping update_value...")
+        self._n_tasks = 0
+
     @rx.event(background=True)
     async def update_torque(self):
         async with self:  # 这是一个锁，不要在这里面sleep
@@ -224,6 +244,8 @@ class ControlDashboardState(rx.State):
             if self._n_tasks == 0:
                 break
             try:
+                res = None
+                aim_torque_res = None
                 async with httpx.AsyncClient() as aclient:
                     res = await aclient.get(
                         f"http://{config['opcua-middleware']}/getvalue/torque_value",
@@ -237,6 +259,17 @@ class ControlDashboardState(rx.State):
                     self._couts.pop(0)
                     self.actual_torque = sum(self._couts) / len(self._couts)
                     # print(f"ControlState: {self.count}")
+                async with httpx.AsyncClient() as aclient:
+                    aim_torque_res = await aclient.get(
+                        f"http://{config['opcua-middleware']}/getvalue/aim_torque",
+                        headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                    )
+                    aim_torque_res.raise_for_status()
+                if not set_torque_lock['running']:
+                    async with self:
+                        siliderstate:SlidersState = await self.get_state(SlidersState)
+                        siliderstate.torque = float(aim_torque_res.json()["value"])
+                        print(11111111111,float(aim_torque_res.json()["value"]))
             except Exception as e:
                 async with self:
                     self.actual_torque = -1.0
@@ -473,7 +506,6 @@ class StopButtonState(rx.State):
         async with self:
             startstate: StartButtonState = await self.get_state(StartButtonState)
             startstate.start_button_text = "完成"
-            print(111111111)
             startstate._runing = False
             # self._running = True
 

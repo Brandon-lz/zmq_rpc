@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	ticker := time.NewTicker(1 * time.Second)
 	for range ticker.C {
 		if checkServerIsOk() {
@@ -22,7 +21,6 @@ func main() {
 			fmt.Println(string(s))
 		}
 	}
-
 }
 
 func checkServerIsOk() bool {

@@ -1,9 +1,29 @@
 from fastapi import FastAPI, WebSocket, Body
-from opcua_start import period_client
 import asyncio
 from pydantic import BaseModel
 
-app = FastAPI(on_shutdown=[period_client.disconnect])
+# dev mode
+import os
+import random
+from dataclasses import dataclass
+
+dev_mode:str = os.getenv("dev_mode")
+
+@dataclass
+class TestValue:
+    aim_torque:float = 0.7
+    heartbeat:int = 0
+
+    def get_torque_value(self)->float:
+        return float(random.randint(0,10000))/10.0 
+
+testvalue = TestValue()
+app = FastAPI()
+
+
+if not dev_mode:
+    from opcua_start import period_client
+    app = FastAPI(on_shutdown=[period_client.disconnect])
 
 
 @app.get("/")
@@ -13,6 +33,15 @@ async def root():
 
 @app.get("/getvalue/{node_name}")
 async def get_value(node_name: str):
+    if dev_mode:
+        result = None
+        if node_name=="torque_value":
+            result = testvalue.get_torque_value()
+        elif node_name == "aim_torque":
+            result = testvalue.aim_torque
+        elif node_name == "heartbeat":
+            result = testvalue.heartbeat
+        return {"value": result}
     return {"value": period_client[node_name].get_value()}
 
 
@@ -37,6 +66,9 @@ class AimTorque(BaseModel):
 @app.put("/set-torque")
 async def set_torque(aim_torque: AimTorque = Body(embed=True)):
     print("set-torque", aim_torque.torque)
+    if dev_mode:
+        testvalue.aim_torque = aim_torque.torque
+        return {"res": "success"}
     period_client["aim_torque"].set_real(aim_torque.torque)
     return {"res": "success"}
 
@@ -46,15 +78,21 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     print("客户端连接成功")
     try:
-        heartbeat = period_client["heartbeat"]
+        if dev_mode:
+            heartbeat = None
+        else:
+            heartbeat = period_client["heartbeat"]
         while True:
             data = await websocket.receive_text()
-            heartvalue = heartbeat.get_value()
-            print("心跳值:", heartvalue)
+            if dev_mode:
+                testvalue.heartbeat += 1
+            else:
+                heartvalue = heartbeat.get_value()
+                print("心跳值:", heartvalue)
+                if heartvalue > 60000:
+                    heartvalue = 1  # 心跳从1开始，0表示断开连接
+                heartbeat.set_int(heartvalue + 1)
             await asyncio.sleep(0.3)
-            if heartvalue > 60000:
-                heartvalue = 1  # 心跳从1开始，0表示断开连接
-            heartbeat.set_int(heartvalue + 1)
 
     except:
         pass

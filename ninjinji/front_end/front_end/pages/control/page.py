@@ -43,7 +43,7 @@ def index() -> rx.Component:
                 rx.avatar(fallback="正常", color_scheme="grass"),
                 rx.avatar(fallback="断开", color_scheme="crimson"),
             ),
-            rx.button("change",on_click=ControlState.changeplc_ok),
+            # rx.button("change",on_click=ControlState.changeplc_ok),
             on_mount=ControlState.update_value,
             align="center",
         ),
