@@ -59,7 +59,7 @@ class SlidersState(rx.State):
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     json={
                         "aim_torque": {
-                            "torque": self.torque,
+                            "torque": float(value[0]),
                         }
                     },
                 )
@@ -269,7 +269,6 @@ class ControlDashboardState(rx.State):
                     async with self:
                         siliderstate:SlidersState = await self.get_state(SlidersState)
                         siliderstate.torque = float(aim_torque_res.json()["value"])
-                        print(11111111111,float(aim_torque_res.json()["value"]))
             except Exception as e:
                 async with self:
                     self.actual_torque = -1.0
