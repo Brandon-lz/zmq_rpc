@@ -50,14 +50,6 @@ class SlidersState(rx.State):
             )
             res.raise_for_status()
             self.torque = float(res.json()["value"])
-
-            # async with httpx.AsyncClient() as aclient:
-            #     res = await aclient.get(
-            #         f"http://{config['opcua-middleware']}/getvalue/aim_torque",
-            #         headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
-            #     )
-            #     res.raise_for_status()
-            #     self.torque = float(res.json()["value"])
         except Exception as e:
             print(f"Error getting torque: {e}")
 
@@ -350,7 +342,7 @@ class ControlDashboardState(rx.State):
 
     @rx.var(cache=False)
     def board_num(self)->str:
-        return f"{self.actual_torque} N•m"
+        return f"{self.actual_torque:.2f} N•m"
 
     def pin_angle(self) -> float:
 
