@@ -90,18 +90,18 @@ def index() -> rx.Component:
             width="100%",
         ),
         torque_chart.create_torque_chart(data=torque_chart.TorqueChartState.data),
-        rx.hstack(
-            rx.button(
-                "曲线测试",
-                color_scheme="red",
-                on_click=torque_chart.TorqueChartState.change_data,
-            ),
-            rx.button(
-                "清空数据",
-                color_scheme="green",
-                on_click=torque_chart.TorqueChartState.clear_data,
-            ),
-        ),
+        # rx.hstack(
+        #     rx.button(
+        #         "曲线测试",
+        #         color_scheme="red",
+        #         on_click=torque_chart.TorqueChartState.change_data,
+        #     ),
+        #     rx.button(
+        #         "清空数据",
+        #         color_scheme="green",
+        #         on_click=torque_chart.TorqueChartState.clear_data,
+        #     ),
+        # ),
        
         rx.hstack(
             rx.heading(f"设置目标扭矩: ",size="4",width="200px"),
