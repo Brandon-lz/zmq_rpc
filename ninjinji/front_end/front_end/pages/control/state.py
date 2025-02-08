@@ -418,9 +418,7 @@ class StartButtonState(rx.State):
     @rx.var(cache=False)
     def animation_background(self)->str:
         persent = self.process_count / (self.process_max - self.process_min) * 1.5
-        # if persent>=0.7:
-        # persent = persent+(persent-persent*0.7)*1.5
-        return f"linear-gradient(90deg, #a6fc06 0%, rgba(79, 209, 197, 1) {persent*self.process_max}%);"
+        return f"linear-gradient(90deg, #a6fc06 0%, rgba(79, 209, 197, 1) {persent*100}%);"
 
     @rx.event(background=True)
     async def on_click(self):
@@ -472,7 +470,6 @@ class StartButtonState(rx.State):
             async with self:
                 # Check for stopping conditions inside context
                 self.process_count = controldashstate.actual_torque
-
                 if not self._runing or self.process_count >= self.process_max:
                     self.start_button_text = "完成"
                     self._runing = False
@@ -482,9 +479,7 @@ class StartButtonState(rx.State):
 
                 self.start_button_text = (
                     "拧紧中 "
-                    + str(
-                        self.process_count * 100.0 / (self.process_max - self.process_min)
-                    )
+                    + f"{(self.process_count * 100.0 / (self.process_max - self.process_min)):.2f}"
                     + "%"
                 )
               
