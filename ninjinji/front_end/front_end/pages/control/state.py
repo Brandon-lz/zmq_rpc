@@ -441,6 +441,13 @@ class StartButtonState(rx.State):
             # State mutation is only allowed inside context block
             self._runing = True
             print("start--------------")
+            async with httpx.AsyncClient() as aclient:
+                res = await aclient.get(
+                    f"http://{config['opcua-middleware']}/getvalue/aim_torque",
+                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                )
+                res.raise_for_status()
+                self.process_max = float(res.json()["value"])
         async with self:
             appstate: AppState = await self.get_state(AppState)
             worker = appstate.get_user()
@@ -459,15 +466,20 @@ class StartButtonState(rx.State):
                 res.raise_for_status()
 
         # 后台任务
+            controldashstate :ControlDashboardState = await self.get_state(ControlDashboardState)
+
         while True:
             async with self:
                 # Check for stopping conditions inside context
+                self.process_count = controldashstate.actual_torque
+
                 if not self._runing or self.process_count >= self.process_max:
                     self.start_button_text = "完成"
                     self._runing = False
                     return
 
-                self.process_count += 1
+                # self.process_count += 1
+
                 self.start_button_text = (
                     "拧紧中 "
                     + str(
@@ -475,16 +487,7 @@ class StartButtonState(rx.State):
                     )
                     + "%"
                 )
-                # self.start_button_text = (
-                #     "running "
-                #     + str(
-                #         self.process_count
-                #         * 100.0
-                #         / (self.process_max - self.process_min)
-                #     )
-                #     + "%"
-                # )
-
+              
                 # Await long operations outside the context to avoid blocking UI
             await asyncio.sleep(0.02)
 
