@@ -49,6 +49,8 @@ async def get_value(node_name: str):
 @app.put("/torque-start")
 async def torque_start():
     print("torque start")
+    if dev_mode:
+        return {"res": "success"}
     period_client["start"].set_bool(True)
     return {"res": "success"}
 
@@ -56,6 +58,8 @@ async def torque_start():
 @app.put("/torque-stop")
 async def torque_stop():
     print("torque stop")
+    if dev_mode:
+        return {"res": "success"}
     period_client["stop"].set_bool(True)
     return {"res": "success"}
 

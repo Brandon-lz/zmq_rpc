@@ -5,6 +5,7 @@
 # 打包项目
 tar --exclude='.venv' --exclude='.web' -cvf ninjinji.tar /workspace/zmq_rpc/ninjinji
 tar --exclude='.venv' --exclude='.web' -cvf ninjinji.tar /home/ubuntu/projects/ninjinji
+tar --exclude='.venv' --exclude='.web' -cvf ninjinji.tar /root/projects/zmq_rpc/ninjinji
 
 # 启动
 docker compose up

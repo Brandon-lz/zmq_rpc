@@ -36,7 +36,7 @@ class SlidersState(rx.State):
     first:bool = True
 
     @rx.var(cache=True)
-    def get_torque(self) -> list[float]:
+    def get_aim_torque(self) -> list[float]:
         if self.first:
             self.init_torque()
             self.first = False
@@ -54,7 +54,7 @@ class SlidersState(rx.State):
             print(f"Error getting torque: {e}")
 
     @rx.event
-    async def set_torque(self, value: list):
+    async def set_aim_torque(self, value: list):
         set_torque_lock['running'] = True
         try:
             async with httpx.AsyncClient() as aclient:
@@ -385,27 +385,27 @@ class StartButtonState(rx.State):
     height = 3
     pressed: bool = False
 
-    # start_button_text: str = "start"
+    start_button_text: str = "开始"
 
     process_max: float = 100
     process_min: float = 0
     process_count: float = process_min
     _runing = False
 
-    @rx.var(cache=True)
-    def start_button_text(self) -> str:
-        if self._runing:
-            return (
-                "拧紧中 "
-                + str(
-                    self.process_count * 100.0 / (self.process_max - self.process_min)
-                )
-                + "%"
-            )
-        else:
-            if self.pressed:
-                return "完成"
-            return "开始"
+    # @rx.var(cache=True)
+    # def start_button_text(self) -> str:
+    #     if self._runing:
+    #         return (
+    #             "拧紧中 "
+    #             + str(
+    #                 self.process_count * 100.0 / (self.process_max - self.process_min)
+    #             )
+    #             + "%"
+    #         )
+    #     else:
+    #         if self.pressed:
+    #             return "完成"
+    #         return "开始"
 
     # @rx.var(cache=False)
     # def button_width(self)->str:
@@ -431,10 +431,10 @@ class StartButtonState(rx.State):
             if self._runing:
                 return
 
-            # self._click()
             self.pressed = not self.pressed
 
-            if not self.pressed:
+            if not self.pressed:   # 如果不是按开始
+                self.start_button_text = "开始"
                 self.process_count = self.process_min
                 return
 
@@ -468,6 +468,13 @@ class StartButtonState(rx.State):
                     return
 
                 self.process_count += 1
+                self.start_button_text = (
+                    "拧紧中 "
+                    + str(
+                        self.process_count * 100.0 / (self.process_max - self.process_min)
+                    )
+                    + "%"
+                )
                 # self.start_button_text = (
                 #     "running "
                 #     + str(
