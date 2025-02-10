@@ -542,7 +542,7 @@ class JogAddButtonState(rx.State):
                 return
             self._running = True
 
-        print("222222222222222222jog add on_pressed")
+        print("jog add on_pressed")
         async with self:
             self._process_count = 0
         ws = get_jog_add_ws()
@@ -561,7 +561,7 @@ class JogAddButtonState(rx.State):
             await asyncio.sleep(0.1)
 
     def on_unpressed(self):
-        print("111111111111111111111jog add on_unpressed-")
+        print("jog add on_unpressed-")
         self._running = False
 
     @rx.var(cache=True)

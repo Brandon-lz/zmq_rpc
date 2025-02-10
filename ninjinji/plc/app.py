@@ -69,7 +69,7 @@ class AimTorque(BaseModel):
 
 
 @app.put("/set-torque")
-async def set_torque(aim_torque: AimTorque = Body(embed=True)):
+async def set_aim_torque(aim_torque: AimTorque = Body(embed=True)):
     print("set-torque", aim_torque.torque)
     if dev_mode:
         testvalue.aim_torque = aim_torque.torque
