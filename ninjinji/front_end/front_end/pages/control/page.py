@@ -116,6 +116,7 @@ def index() -> rx.Component:
                 # on_change=SlidersState.set_torque.throttle(6000),
                 # on_mount=SlidersState.init_torque,
             ),
+            rx.spacer(),
             rx.heading(f"设置最大扭矩: ",size="4",width="360px"),
             rx.avatar(fallback=f"{SlidersState.max_torque}"),
             rx.heading(f"N.m",size="4"),
