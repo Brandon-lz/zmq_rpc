@@ -13,7 +13,7 @@ dev_mode:str = os.getenv("dev_mode")
 @dataclass
 class TestValue:
     aim_torque:float = 0.7
-    max_torque:float = 4000.0
+    max_torque:float = 5000.0
     heartbeat:int = 0
     handle_mode:bool = True
 
@@ -46,6 +46,8 @@ async def get_value(node_name: str):
             result = testvalue.heartbeat
         elif node_name == "handle_mode":
             result = testvalue.handle_mode
+        elif node_name == "max_torque":
+            result = testvalue.max_torque
         return {"value": result}
     return {"value": period_client[node_name].get_value()}
 

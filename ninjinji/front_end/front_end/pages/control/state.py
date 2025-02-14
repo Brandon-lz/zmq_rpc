@@ -33,6 +33,7 @@ set_torque_lock = {"running": False}
 
 class SlidersState(rx.State):
     torque: float = 0.7
+    max_torque: float = 4000.0
     first:bool = True
 
     @rx.var(cache=True)
@@ -50,6 +51,12 @@ class SlidersState(rx.State):
             )
             res.raise_for_status()
             self.torque = float(res.json()["value"])
+            res = requests.get(
+                f"http://{config['opcua-middleware']}/getvalue/max_torque",
+                headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+            )
+            res.raise_for_status()
+            self.max_torque = float(res.json()["value"])
         except Exception as e:
             print(f"Error getting torque: {e}")
 
