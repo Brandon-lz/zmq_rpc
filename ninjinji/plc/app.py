@@ -13,7 +13,9 @@ dev_mode:str = os.getenv("dev_mode")
 @dataclass
 class TestValue:
     aim_torque:float = 0.7
+    max_torque:float = 4000.0
     heartbeat:int = 0
+    handle_mode:bool = True
 
     def get_torque_value(self)->float:
         return float(random.randint(0,60000))/10.0 
@@ -42,6 +44,8 @@ async def get_value(node_name: str):
             result = testvalue.aim_torque
         elif node_name == "heartbeat":
             result = testvalue.heartbeat
+        elif node_name == "handle_mode":
+            result = testvalue.handle_mode
         return {"value": result}
     return {"value": period_client[node_name].get_value()}
 
@@ -75,6 +79,34 @@ async def set_aim_torque(aim_torque: AimTorque = Body(embed=True)):
         testvalue.aim_torque = aim_torque.torque
         return {"res": "success"}
     period_client["aim_torque"].set_real(aim_torque.torque)
+    return {"res": "success"}
+
+    
+class MaxTorque(BaseModel):
+    torque: float
+
+
+@app.put("/set-max-torque")
+async def set_max_torque(max_torque: MaxTorque = Body(embed=True)):
+    print("set-torque", max_torque.torque)
+    if dev_mode:
+        testvalue.aim_torque = max_torque.torque
+        return {"res": "success"}
+    period_client["max_torque"].set_real(max_torque.torque)
+    return {"res": "success"}
+
+
+
+class HandleMode(BaseModel):
+    handle_mode: bool
+
+@app.put("/change-handle-mode")
+async def change_handle_mode(reqbody: HandleMode = Body(embed=True)):
+    print("change-handle-mode", reqbody.handle_mode)
+    if dev_mode:
+        testvalue.handle_mode = reqbody.handle_mode
+        return {"res": "success"}
+    period_client["handle_mode"].set_bool(reqbody.handle_mode)
     return {"res": "success"}
 
 

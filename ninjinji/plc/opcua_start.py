@@ -89,6 +89,22 @@ period_client.register_opcvar(
     name="aim_torque",
 )
 
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["max-torque"]["node_id"],
+    ),
+    name="max_torque",
+)
+
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["handle-mode"]["node_id"],
+    ),
+    name="handle_mode",
+)
+
 
 print(period_client.opc_vars_names)
 

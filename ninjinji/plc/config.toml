@@ -24,4 +24,11 @@ node_id = "ns=4;i=19"
 node_id = "ns=4;i=23"
 
 [nodes.aim-torque]
-node_id = "ns=4;i=24"
+node_id = "ns=4;i=27"
+
+[nodes.max-torque]
+node_id = "ns=4;i=26"
+
+[nodes.handle-mode]
+node_id = "ns=4;i=25"
+
