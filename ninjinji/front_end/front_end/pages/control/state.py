@@ -43,6 +43,14 @@ class SlidersState(rx.State):
             self.first = False
         return [self.torque]
 
+    @rx.var(cache=True)
+    def get_max_torque(self) -> list[float]:
+        if self.first:
+            self.init_torque()
+            self.first = False
+        return [self.max_torque]
+
+
     def init_torque(self):
         try:
             res = requests.get(

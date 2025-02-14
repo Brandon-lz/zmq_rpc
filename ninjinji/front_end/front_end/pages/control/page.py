@@ -121,7 +121,7 @@ def index() -> rx.Component:
             rx.avatar(fallback=f"{SlidersState.max_torque}"),
             rx.heading(f"N.m",size="4"),
             rx.slider(
-                default_value=SlidersState.max_torque,
+                default_value=SlidersState.get_max_torque,
                 # value=SlidersState.get_torque,
                 min=0.0,
                 max=6000.0,
