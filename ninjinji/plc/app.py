@@ -92,7 +92,7 @@ class MaxTorque(BaseModel):
 async def set_max_torque(max_torque: MaxTorque = Body(embed=True)):
     print("set-torque", max_torque.torque)
     if dev_mode:
-        testvalue.aim_torque = max_torque.torque
+        testvalue.max_torque = max_torque.torque
         return {"res": "success"}
     period_client["max_torque"].set_real(max_torque.torque)
     return {"res": "success"}

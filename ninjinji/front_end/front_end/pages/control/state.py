@@ -29,6 +29,7 @@ update_torque_running = {"running": False, "time": 0.0}
 
 
 set_torque_lock = {"running": False}
+set_maxtorque_lock = {"running": False}
 
 
 class SlidersState(rx.State):
@@ -83,10 +84,30 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            await self.init_torque()
+            self.init_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
         set_torque_lock["running"] = False
+    
+    @rx.event
+    async def set_max_torque(self, value: list):
+        set_maxtorque_lock['running'] = True
+        try:
+            async with httpx.AsyncClient() as aclient:
+                res = await aclient.put(
+                    f"http://{config['opcua-middleware']}/set-max-torque",
+                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                    json={
+                        "max_torque": {
+                            "torque": float(value[0]),
+                        }
+                    },
+                )
+                res.raise_for_status()
+            self.init_torque()
+        except Exception as e:
+            print(f"Error setting torque: {e}")
+        set_maxtorque_lock["running"] = False
 
 
 class ControlState(rx.State):
