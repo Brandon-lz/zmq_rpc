@@ -72,6 +72,10 @@ class SlidersState(rx.State):
     @rx.event
     async def set_aim_torque(self, value: list):
         set_torque_lock['running'] = True
+        aim_torque = float(value[0])
+        if aim_torque>self.max_torque:
+            aim_torque = self.max_torque
+            yield  rx.toast.error(f"输出扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置")
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
@@ -79,7 +83,7 @@ class SlidersState(rx.State):
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     json={
                         "aim_torque": {
-                            "torque": float(value[0]),
+                            "torque": aim_torque,
                         }
                     },
                 )
