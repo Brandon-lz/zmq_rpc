@@ -6,6 +6,10 @@ import json
 import httpx
 import time
 import requests
+from datetime import datetime
+
+from typing import List, Dict
+import random
 
 
 import math
@@ -30,6 +34,38 @@ update_torque_running = {"running": False, "time": 0.0}
 
 set_torque_lock = {"running": False}
 set_maxtorque_lock = {"running": False}
+
+
+class TorqueChartState(rx.State):
+    data: List[Dict] = [
+        {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 4000, "实际扭矩": 0, "amt": 2400},
+        {"timestamp": "2025-01-20 14:23:29", "目标扭矩": 3000, "实际扭矩": None, "amt": 2000},
+        {"timestamp": "2025-01-20 14:23:30", "目标扭矩": 2000, "实际扭矩": None, "amt": 1600},
+        {"timestamp": "2025-01-20 14:23:31", "目标扭矩": 1000, "实际扭矩": None, "amt": 1200},
+        {"timestamp": "2025-01-20 14:23:32", "目标扭矩": 500, "实际扭矩": None, "amt": 800},
+    ]
+    pointer:int = 0
+
+    def update_data(self, value:float):
+        if len(self.data) < self.pointer+1:
+            self.data.append(
+                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": None, "amt": 800},
+            )
+        else:
+            self.data[self.pointer]["实际扭矩"] = value
+        self.pointer += 1
+        print(self.data)
+        
+
+    @rx.event
+    def change_data(self):
+        self.data[random.randint(0,4)]['实际扭矩'] = random.randint(0,5000)
+        # self.data.append({"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": random.randint(1000, 5000), "实际扭矩": random.randint(1000, 5000), "amt": random.randint(1000, 5000)})
+
+    # @rx.event
+    def clear_data(self):
+        self.data = [{"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": random.randint(0,5000), "实际扭矩": 0, "amt": 0}  for i in range(5)]
+        self.pointer = 0
 
 
 class SlidersState(rx.State):
@@ -521,11 +557,15 @@ class StartButtonState(rx.State):
 
         # 后台任务
             controldashstate :ControlDashboardState = await self.get_state(ControlDashboardState)
+            torqueChartstate :TorqueChartState = await self.get_state(TorqueChartState)
 
         while True:
             async with self:
                 # Check for stopping conditions inside context
+                # 实时更新扭力值
                 self.process_count = controldashstate.actual_torque
+                torqueChartstate.update_data(controldashstate.actual_torque)
+
                 if not self._runing or self.process_count >= self.process_max:
                     self.start_button_text = "完成"
                     self._runing = False
@@ -569,6 +609,8 @@ class StopButtonState(rx.State):
         #     return
         async with self:
             startstate: StartButtonState = await self.get_state(StartButtonState)
+            chartstate: TorqueChartState = await self.get_state(TorqueChartState)
+            chartstate.clear_data()
             startstate.start_button_text = "完成"
             startstate._runing = False
             # self._running = True

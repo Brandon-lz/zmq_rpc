@@ -15,6 +15,7 @@ from .state import (
     StopButtonState,
     JogAddButtonState,
     JogSubButtonState,
+    TorqueChartState,
 )
 
 
@@ -89,7 +90,7 @@ def index() -> rx.Component:
             flex_direction="row",
             width="100%",
         ),
-        torque_chart.create_torque_chart(data=torque_chart.TorqueChartState.data),
+        torque_chart.create_torque_chart(data=TorqueChartState.data),
         # rx.hstack(
         #     rx.button(
         #         "曲线测试",
@@ -147,7 +148,7 @@ def index() -> rx.Component:
             custom_button.create_start_button(
                 StartButtonState.pressed,
                 StartButtonState.animation_background,
-                click_start=StartButtonState.on_click,
+                click_start=StartButtonState.on_click,     # 开始拧紧
                 click_finish=StartButtonState.on_click,
                 button_text=StartButtonState.start_button_text,
             ),
