@@ -95,6 +95,22 @@ class SlidersState(rx.State):
     
     @rx.event
     async def set_max_torque(self, value: list):
+        max_torque = float(value[0])
+        if self.torque > max_torque:
+            async with httpx.AsyncClient() as aclient:
+                res = await aclient.put(
+                    f"http://{config['opcua-middleware']}/set-torque",
+                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                    json={
+                        "aim_torque": {
+                            "torque": max_torque,
+                        }
+                    },
+                )
+                res.raise_for_status()
+            self.init_torque()
+            yield  rx.toast.warning(f"输出扭矩小于当前设定的最大扭矩，将按照最大扭矩{max_torque} N.m 调整输出扭矩")
+
         set_maxtorque_lock['running'] = True
         try:
             async with httpx.AsyncClient() as aclient:
