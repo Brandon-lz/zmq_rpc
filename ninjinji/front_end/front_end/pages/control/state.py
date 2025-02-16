@@ -38,18 +38,15 @@ set_maxtorque_lock = {"running": False}
 
 class TorqueChartState(rx.State):
     data: List[Dict] = [
-        {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 4000, "实际扭矩": 0, "amt": 2400},
-        {"timestamp": "2025-01-20 14:23:29", "目标扭矩": 3000, "实际扭矩": None, "amt": 2000},
-        {"timestamp": "2025-01-20 14:23:30", "目标扭矩": 2000, "实际扭矩": None, "amt": 1600},
-        {"timestamp": "2025-01-20 14:23:31", "目标扭矩": 1000, "实际扭矩": None, "amt": 1200},
-        {"timestamp": "2025-01-20 14:23:32", "目标扭矩": 500, "实际扭矩": None, "amt": 800},
+        # {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, "amt": 2400},
     ]
+    pre_set_data:List[float] = [500,600,700,900,1500,2000,2500,3500,4500]
     pointer:int = 0
 
     def update_data(self, value:float):
         if len(self.data) < self.pointer+1:
             self.data.append(
-                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": None, "amt": 800},
+                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": value, "amt": 800},
             )
         else:
             self.data[self.pointer]["实际扭矩"] = value
