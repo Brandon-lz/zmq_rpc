@@ -38,7 +38,7 @@ EXPOSE 9000
 # Run the FastAPI application by default
 # Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
 # Uses `--host 0.0.0.0` to allow access from outside the container
-ENV dev_mode=1
+# ENV dev_mode=1
 
 CMD ["python","app.py"]
 
