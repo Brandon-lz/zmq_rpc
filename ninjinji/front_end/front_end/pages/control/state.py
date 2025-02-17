@@ -609,7 +609,8 @@ class StopButtonState(rx.State):
             startstate: StartButtonState = await self.get_state(StartButtonState)
             chartstate: TorqueChartState = await self.get_state(TorqueChartState)
             chartstate.clear_data()
-            startstate.start_button_text = "完成"
+            if startstate.start_button_text == "进行中":
+                startstate.start_button_text = "完成"
             startstate._runing = False
             # self._running = True
 
