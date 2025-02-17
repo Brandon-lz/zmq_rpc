@@ -16,6 +16,7 @@ from .state import (
     JogAddButtonState,
     JogSubButtonState,
     TorqueChartState,
+    HandleModeSwitchState,
 )
 
 
@@ -43,6 +44,10 @@ def index() -> rx.Component:
                 ControlState.plc_ok,
                 rx.avatar(fallback="正常", color_scheme="grass"),
                 rx.avatar(fallback="断开", color_scheme="crimson"),
+            ),
+            rx.center(
+                rx.switch(on_change=HandleModeSwitchState.set_handle_mode_value,on_mount=HandleModeSwitchState.init_data),
+                rx.badge(HandleModeSwitchState.value),
             ),
             # rx.button("change",on_click=ControlState.changeplc_ok),
             on_mount=ControlState.update_heartbeat_value,

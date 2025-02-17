@@ -36,6 +36,23 @@ set_torque_lock = {"running": False}
 set_maxtorque_lock = {"running": False}
 
 
+class HandleModeSwitchState(rx.State):
+    value: bool = False
+
+    @rx.event
+    def init_data(self):
+        res = requests.get(
+                f"http://{config['opcua-middleware']}/getvalue/handle_mode",
+                headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+            )
+        res.raise_for_status()
+        self.value = bool(res.json()["value"])
+
+    @rx.event
+    def set_handle_mode_value(self, value: bool):
+        self.value = value
+
+
 class TorqueChartState(rx.State):
     data: List[Dict] = [
         {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, "amt": 2400},
