@@ -17,8 +17,13 @@ class TestValue:
     heartbeat:int = 0
     handle_mode:bool = True
 
+    _torque_values = [0.,0.,0.,0.,0.]
+
     def get_torque_value(self)->float:
-        return float(random.randint(0,60000))/10.0 
+        self._torque_values.append(float(random.randint(0,60000))/10.0)
+        self._torque_values.pop(0)
+        return sum(self._torque_values)/len(self._torque_values)
+        
 
 testvalue = TestValue()
 app = FastAPI()

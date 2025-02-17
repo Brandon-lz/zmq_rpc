@@ -348,12 +348,11 @@ class ControlDashboardState(rx.State):
                     )
                     res.raise_for_status()
                 async with self:
-                    # self.actual_torque = float(res.json()["value"]) + 1.0
                     self.actual_torque = float(res.json()["value"])
+                    # 滤波
                     # self._couts.append(self.actual_torque)
                     # self._couts.pop(0)
                     # self.actual_torque = sum(self._couts) / len(self._couts)
-                    # print(f"ControlState: {self.count}")
                 async with httpx.AsyncClient() as aclient:
                     aim_torque_res = await aclient.get(
                         f"http://{config['opcua-middleware']}/getvalue/aim_torque",
@@ -557,7 +556,7 @@ class StartButtonState(rx.State):
         # 后台任务
             controldashstate :ControlDashboardState = await self.get_state(ControlDashboardState)
             torqueChartstate :TorqueChartState = await self.get_state(TorqueChartState)
-            torqueChartstate._clear_data()
+            torqueChartstate.clear_data()
         while True:
             async with self:
                 # Check for stopping conditions inside context
