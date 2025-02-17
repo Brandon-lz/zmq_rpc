@@ -90,7 +90,7 @@ def index() -> rx.Component:
             flex_direction="row",
             width="100%",
         ),
-        torque_chart.create_torque_chart(data=TorqueChartState.data),
+        torque_chart.create_torque_chart(data=TorqueChartState.data, on_mount=TorqueChartState.clear_data),
         # rx.hstack(
         #     rx.button(
         #         "曲线测试",

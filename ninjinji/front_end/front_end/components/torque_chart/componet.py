@@ -1,6 +1,6 @@
 import reflex as rx
 
-def create_torque_chart(data,style: dict={}) -> rx.Component:
+def create_torque_chart(data,style: dict={},on_mount=None) -> rx.Component:
     return rx.recharts.area_chart(
         rx.recharts.area(
             data_key="目标扭矩",
@@ -24,6 +24,7 @@ def create_torque_chart(data,style: dict={}) -> rx.Component:
         ),
         rx.recharts.graphing_tooltip(),
         rx.recharts.legend(),
+        on_mount=on_mount,
         data=data,
         width="100%",
         height=300,

@@ -38,7 +38,7 @@ set_maxtorque_lock = {"running": False}
 
 class TorqueChartState(rx.State):
     data: List[Dict] = [
-        # {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, "amt": 2400},
+        {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, "amt": 2400},
     ]
     pre_set_data:List[float] = [500,600,700,900,1500,2000,2500,3500,4500]
     pointer:int = 0
@@ -50,8 +50,8 @@ class TorqueChartState(rx.State):
             )
         else:
             self.data[self.pointer]["实际扭矩"] = value
+            self.data[self.pointer]["目标扭矩"] = self.pre_set_data[self.pointer]
         self.pointer += 1
-        print(self.data)
         
 
     @rx.event
@@ -59,9 +59,12 @@ class TorqueChartState(rx.State):
         self.data[random.randint(0,4)]['实际扭矩'] = random.randint(0,5000)
         # self.data.append({"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": random.randint(1000, 5000), "实际扭矩": random.randint(1000, 5000), "amt": random.randint(1000, 5000)})
 
-    # @rx.event
+    @rx.event
     def clear_data(self):
-        self.data = [{"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": random.randint(0,5000), "实际扭矩": 0, "amt": 0}  for i in range(5)]
+        self._clear_data()
+    
+    def _clear_data(self):
+        self.data = [{"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": 0, "实际扭矩": 0, "amt": 0}  for i in range(5)]
         self.pointer = 0
 
 
@@ -347,9 +350,9 @@ class ControlDashboardState(rx.State):
                 async with self:
                     # self.actual_torque = float(res.json()["value"]) + 1.0
                     self.actual_torque = float(res.json()["value"])
-                    self._couts.append(self.actual_torque)
-                    self._couts.pop(0)
-                    self.actual_torque = sum(self._couts) / len(self._couts)
+                    # self._couts.append(self.actual_torque)
+                    # self._couts.pop(0)
+                    # self.actual_torque = sum(self._couts) / len(self._couts)
                     # print(f"ControlState: {self.count}")
                 async with httpx.AsyncClient() as aclient:
                     aim_torque_res = await aclient.get(
@@ -554,7 +557,7 @@ class StartButtonState(rx.State):
         # 后台任务
             controldashstate :ControlDashboardState = await self.get_state(ControlDashboardState)
             torqueChartstate :TorqueChartState = await self.get_state(TorqueChartState)
-
+            torqueChartstate._clear_data()
         while True:
             async with self:
                 # Check for stopping conditions inside context
