@@ -521,7 +521,9 @@ class StartButtonState(rx.State):
 
             self.pressed = not self.pressed
 
-            if not self.pressed:   # 如果不是按开始
+            if not self.pressed:   # 如果不是按开始，按下了完成
+                chart_state:TorqueChartState = await self.get_state(TorqueChartState)
+                chart_state.clear_data()
                 self.start_button_text = "开始"
                 self.process_count = self.process_min
                 return
@@ -608,7 +610,7 @@ class StopButtonState(rx.State):
         async with self:
             startstate: StartButtonState = await self.get_state(StartButtonState)
             chartstate: TorqueChartState = await self.get_state(TorqueChartState)
-            chartstate.clear_data()
+            # chartstate.clear_data()
             if startstate.start_button_text == "进行中":
                 startstate.start_button_text = "完成"
             startstate._runing = False
