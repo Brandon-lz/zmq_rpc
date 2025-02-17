@@ -216,7 +216,6 @@ class ControlState(rx.State):
                 print(self.plc_ok)
 
             await asyncio.sleep(1)
-
     
     @rx.event
     def changeplc_ok(self):
