@@ -108,6 +108,7 @@ class SlidersState(rx.State):
         if self.first:
             self.init_torque()
             self.first = False
+        print(11111111,self.torque)
         return [self.torque]
     
     @rx.var(cache=True)
