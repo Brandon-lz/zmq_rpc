@@ -37,7 +37,7 @@ set_maxtorque_lock = {"running": False}
 
 
 class HandleModeSwitchState(rx.State):
-    value: bool = False
+    handle_mode: bool = False
 
     @rx.event
     def init_data(self):
@@ -46,7 +46,7 @@ class HandleModeSwitchState(rx.State):
                 headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
             )
         res.raise_for_status()
-        self.value = bool(res.json()["value"])
+        self.handle_mode = bool(res.json()["value"])
 
     @rx.event
     async def set_handle_mode_value(self, value: bool):
@@ -61,7 +61,7 @@ class HandleModeSwitchState(rx.State):
                 },
             )
             res.raise_for_status()
-        self.value = value
+        self.handle_mode = value
 
 
 class TorqueChartState(rx.State):

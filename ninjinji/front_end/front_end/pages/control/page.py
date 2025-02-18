@@ -50,16 +50,14 @@ def index() -> rx.Component:
             rx.center(
                 rx.heading("手自动模式: ",size="2"),
                 rx.spacer(width="0.5em"),
-                # rx.badge(HandleModeSwitchState.value),
                 rx.cond(
-                    ~HandleModeSwitchState.value,
+                    ~HandleModeSwitchState.handle_mode,
                     rx.avatar(fallback="手动", color_scheme="orange"),
                     rx.avatar(fallback="自动", color_scheme="grass"),
                 ),
                 rx.spacer(width="0.5em"),
-                rx.switch(checked=HandleModeSwitchState.value,on_change=HandleModeSwitchState.set_handle_mode_value,on_mount=HandleModeSwitchState.init_data),
+                rx.switch(checked=HandleModeSwitchState.handle_mode, on_change=HandleModeSwitchState.set_handle_mode_value, on_mount=HandleModeSwitchState.init_data),
             ),
-            # rx.button("change",on_click=ControlState.changeplc_ok),
             on_mount=ControlState.update_heartbeat_value,
             align="center",
         ),
@@ -121,19 +119,30 @@ def index() -> rx.Component:
 
         rx.hstack(
             rx.cond(
-                HandleModeSwitchState.value,
+                HandleModeSwitchState.handle_mode,
                 rx.hstack(
                     rx.heading(f"设置输出扭矩: ",size="4",width="200px"),
                     rx.avatar(fallback=f"{SlidersState.torque}"),
                     rx.heading(f"N.m",size="4"),
                     rx.slider(
-                        default_value=SlidersState.get_aim_torque,
-                        # value=SlidersState.get_torque,
+                        value=SlidersState.get_aim_torque,
                         min=0.0,
                         max=6000.0,
-                        on_value_commit=SlidersState.set_aim_torque,
-                        # on_change=SlidersState.set_torque.throttle(6000),
-                        # on_mount=SlidersState.init_torque,
+                        on_change=SlidersState.set_aim_torque.throttle(300),
+                    ),
+                    rx.spacer(),
+                    min_width = "600px",
+                    align="center",
+                ),
+                rx.hstack(
+                    rx.heading(f"设置目标扭矩: ",size="4",width="200px"),
+                    rx.avatar(fallback=f"{SlidersState.torque}"),
+                    rx.heading(f"N.m",size="4"),
+                    rx.slider(
+                        value=SlidersState.get_aim_torque,
+                        min=0.0,
+                        max=6000.0,
+                        on_change=SlidersState.set_aim_torque.throttle(300),
                     ),
                     rx.spacer(),
                     min_width = "600px",
@@ -147,12 +156,9 @@ def index() -> rx.Component:
                 rx.heading(f"N.m",size="4"),
                 rx.slider(
                     default_value=SlidersState.get_max_torque,
-                    # value=SlidersState.get_torque,
                     min=0.0,
                     max=6000.0,
                     on_value_commit=SlidersState.set_max_torque,
-                    # on_change=SlidersState.set_torque.throttle(6000),
-                    # on_mount=SlidersState.init_torque,
                 ),
                 min_width = "600px",
                 align="center",
