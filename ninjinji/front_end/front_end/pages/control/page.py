@@ -45,9 +45,19 @@ def index() -> rx.Component:
                 rx.avatar(fallback="正常", color_scheme="grass"),
                 rx.avatar(fallback="断开", color_scheme="crimson"),
             ),
+            rx.spacer(width="2em"),
+            # 手自动切换
             rx.center(
-                rx.switch(on_change=HandleModeSwitchState.set_handle_mode_value,on_mount=HandleModeSwitchState.init_data),
-                rx.badge(HandleModeSwitchState.value),
+                rx.heading("手自动模式: ",size="2"),
+                rx.spacer(width="0.5em"),
+                # rx.badge(HandleModeSwitchState.value),
+                rx.cond(
+                    HandleModeSwitchState.value,
+                    rx.avatar(fallback="手动", color_scheme="orange"),
+                    rx.avatar(fallback="自动", color_scheme="grass"),
+                ),
+                rx.spacer(width="0.5em"),
+                rx.switch(checked=HandleModeSwitchState.value,on_change=HandleModeSwitchState.set_handle_mode_value,on_mount=HandleModeSwitchState.init_data),
             ),
             # rx.button("change",on_click=ControlState.changeplc_ok),
             on_mount=ControlState.update_heartbeat_value,
