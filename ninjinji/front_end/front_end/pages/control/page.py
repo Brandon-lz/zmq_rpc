@@ -52,7 +52,7 @@ def index() -> rx.Component:
                 rx.spacer(width="0.5em"),
                 # rx.badge(HandleModeSwitchState.value),
                 rx.cond(
-                    HandleModeSwitchState.value,
+                    ~HandleModeSwitchState.value,
                     rx.avatar(fallback="手动", color_scheme="orange"),
                     rx.avatar(fallback="自动", color_scheme="grass"),
                 ),
