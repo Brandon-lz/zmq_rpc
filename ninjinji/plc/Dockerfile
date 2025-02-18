@@ -1,9 +1,8 @@
 # Use a Python image with uv pre-installed
 FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
-# 先执行
-# reflex export
-# unzip backend.zip -d backend
+# 执行
+# docker build --no-cache  --no-cache . -t plc
 
 # Install the project into `/app`
 WORKDIR /app
