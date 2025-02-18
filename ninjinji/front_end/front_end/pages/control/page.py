@@ -119,7 +119,7 @@ def index() -> rx.Component:
 
         rx.hstack(
             rx.cond(
-                HandleModeSwitchState.handle_mode,
+                ~HandleModeSwitchState.handle_mode,
                 rx.hstack(
                     rx.heading(f"设置输出扭矩: ",size="4",width="200px"),
                     rx.avatar(fallback=f"{SlidersState.torque}"),

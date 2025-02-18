@@ -33,6 +33,7 @@ update_torque_running = {"running": False, "time": 0.0}
 
 
 set_torque_lock = {"running": False}
+set_aimtorque_lock = {"running": False}
 set_maxtorque_lock = {"running": False}
 
 
@@ -98,16 +99,24 @@ class TorqueChartState(rx.State):
 
 class SlidersState(rx.State):
     torque: float = 0.7
+    aim_torque: float = 0.7
     max_torque: float = 4000.0
     first:bool = True
 
+    @rx.var(cache=True)
+    def get_output_torque(self) -> list[float]:
+        if self.first:
+            self.init_torque()
+            self.first = False
+        return [self.torque]
+    
     @rx.var(cache=True)
     def get_aim_torque(self) -> list[float]:
         if self.first:
             self.init_torque()
             self.first = False
         return [self.torque]
-
+    
     @rx.var(cache=True)
     def get_max_torque(self) -> list[float]:
         if self.first:
@@ -115,35 +124,79 @@ class SlidersState(rx.State):
             self.first = False
         return [self.max_torque]
 
-
-    def init_torque(self):
+    def update_output_torque(self):
         try:
             res = requests.get(
-                f"http://{config['opcua-middleware']}/getvalue/aim_torque",
+                f"http://{config['opcua-middleware']}/getvalue/output_torque",
                 headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
             )
             res.raise_for_status()
             self.torque = float(res.json()["value"])
+        except Exception as e:
+            print(f"获取输出扭矩失败: {e}")
+
+    def update_aim_torque(self):
+        try:
             res = requests.get(
-                f"http://{config['opcua-middleware']}/getvalue/max_torque",
-                headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
-            )
+                    f"http://{config['opcua-middleware']}/getvalue/aim_torque",
+                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                )
+            res.raise_for_status()
+            self.aim_torque = float(res.json()["value"])
+        except Exception as e:
+            print(f"获取目标扭矩失败: {e}")
+
+    def update_max_torque(self):
+        try:
+            res = requests.get(
+                    f"http://{config['opcua-middleware']}/getvalue/max_torque",
+                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                )
             res.raise_for_status()
             self.max_torque = float(res.json()["value"])
         except Exception as e:
-            print(f"Error getting torque: {e}")
+            print(f"获取最大扭矩失败: {e}")
+
+    def init_torque(self):
+       self.update_output_torque()
+       self.update_aim_torque()
+       self.update_max_torque()
 
     @rx.event
-    async def set_aim_torque(self, value: list):
+    async def set_output_torque(self, value: list):
         set_torque_lock['running'] = True
-        aim_torque = float(value[0])
-        if aim_torque>self.max_torque:
-            aim_torque = self.max_torque
-            yield  rx.toast.error(f"输出扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置",duration=1000)
+        ouput_torque = float(value[0])
+        if ouput_torque>self.max_torque:
+            ouput_torque = self.max_torque
+            yield  rx.toast.error(f"输出扭矩不能大于最大扭矩，将按照最大扭矩{ouput_torque} N.m设置",duration=1000)
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
                     f"http://{config['opcua-middleware']}/set-torque",
+                    headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                    json={
+                        "output_torque": {
+                            "torque": ouput_torque,
+                        }
+                    },
+                )
+                res.raise_for_status()
+            self.update_output_torque()
+        except Exception as e:
+            print(f"Error setting torque: {e}")
+        set_torque_lock["running"] = False
+
+    @rx.event
+    async def set_aim_torque(self, value: list):
+        set_aimtorque_lock['running'] = True
+        aim_torque = float(value[0])
+        if aim_torque>self.max_torque:
+            aim_torque = self.max_torque
+            yield  rx.toast.error(f"目标扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置",duration=1000)
+        try:
+            async with httpx.AsyncClient() as aclient:
+                res = await aclient.put(
+                    f"http://{config['opcua-middleware']}/set-aim-torque",
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     json={
                         "aim_torque": {
@@ -152,10 +205,10 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            self.init_torque()
+            self.update_aim_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
-        set_torque_lock["running"] = False
+        set_aimtorque_lock["running"] = False
     
     @rx.event
     async def set_max_torque(self, value: list):
@@ -172,7 +225,7 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            self.init_torque()
+            self.update_max_torque()
             yield  rx.toast.warning(f"输出扭矩小于当前设定的最大扭矩，将按照最大扭矩{max_torque} N.m 调整输出扭矩",duration=1000)
 
         set_maxtorque_lock['running'] = True

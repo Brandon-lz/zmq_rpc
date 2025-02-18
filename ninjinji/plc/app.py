@@ -13,6 +13,7 @@ dev_mode:str = os.getenv("dev_mode")
 @dataclass
 class TestValue:
     aim_torque:float = 0.7
+    ouput_torque:float = 0.7
     max_torque:float = 5000.0
     heartbeat:int = 0
     handle_mode:bool = True
@@ -45,6 +46,8 @@ async def get_value(node_name: str):
         result = None
         if node_name=="torque_value":
             result = testvalue.get_torque_value()
+        elif node_name == "output_torque":
+            result = testvalue.ouput_torque
         elif node_name == "aim_torque":
             result = testvalue.aim_torque
         elif node_name == "heartbeat":
@@ -74,19 +77,30 @@ async def torque_stop():
     period_client["stop"].set_bool(True)
     return {"res": "success"}
 
+class OutputTorque(BaseModel):
+    torque: float
+
+@app.put("/set-torque")
+async def set_output_torque(output_torque: OutputTorque = Body(embed=True)):
+    print("set-torque", output_torque.torque)
+    if dev_mode:
+        testvalue.ouput_torque = output_torque.torque
+        return {"res": "success"}
+    period_client["aim_torque"].set_real(output_torque.torque)      # 这里后面改
+    return {"res": "success"}
 
 class AimTorque(BaseModel):
     torque: float
 
-
-@app.put("/set-torque")
+@app.put("/set-aim-torque")
 async def set_aim_torque(aim_torque: AimTorque = Body(embed=True)):
-    print("set-torque", aim_torque.torque)
+    print("set-aim-torque", aim_torque.torque)
     if dev_mode:
         testvalue.aim_torque = aim_torque.torque
         return {"res": "success"}
     period_client["aim_torque"].set_real(aim_torque.torque)
     return {"res": "success"}
+
 
     
 class MaxTorque(BaseModel):
