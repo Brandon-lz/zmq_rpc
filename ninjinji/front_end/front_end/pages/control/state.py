@@ -139,7 +139,7 @@ class SlidersState(rx.State):
         aim_torque = float(value[0])
         if aim_torque>self.max_torque:
             aim_torque = self.max_torque
-            yield  rx.toast.error(f"输出扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置")
+            yield  rx.toast.error(f"输出扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置",duration=1000)
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
@@ -173,7 +173,7 @@ class SlidersState(rx.State):
                 )
                 res.raise_for_status()
             self.init_torque()
-            yield  rx.toast.warning(f"输出扭矩小于当前设定的最大扭矩，将按照最大扭矩{max_torque} N.m 调整输出扭矩")
+            yield  rx.toast.warning(f"输出扭矩小于当前设定的最大扭矩，将按照最大扭矩{max_torque} N.m 调整输出扭矩",duration=1000)
 
         set_maxtorque_lock['running'] = True
         try:
