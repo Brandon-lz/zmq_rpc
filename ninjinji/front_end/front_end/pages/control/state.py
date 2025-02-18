@@ -49,7 +49,18 @@ class HandleModeSwitchState(rx.State):
         self.value = bool(res.json()["value"])
 
     @rx.event
-    def set_handle_mode_value(self, value: bool):
+    async def set_handle_mode_value(self, value: bool):
+        async with httpx.AsyncClient() as aclient:
+            res = await aclient.put(
+                f"http://{config['opcua-middleware']}/change-handle-mode",
+                headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                json={
+                    "handle_model": {
+                        "value": value
+                    }
+                },
+            )
+            res.raise_for_status()
         self.value = value
 
 

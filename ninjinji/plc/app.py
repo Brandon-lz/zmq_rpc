@@ -105,15 +105,15 @@ async def set_max_torque(max_torque: MaxTorque = Body(embed=True)):
 
 
 class HandleMode(BaseModel):
-    handle_mode: bool
+    value: bool
 
 @app.put("/change-handle-mode")
-async def change_handle_mode(reqbody: HandleMode = Body(embed=True)):
-    print("change-handle-mode", reqbody.handle_mode)
+async def change_handle_mode(handle_model: HandleMode = Body(embed=True)):
+    print("change-handle-mode", handle_model.value)
     if dev_mode:
-        testvalue.handle_mode = reqbody.handle_mode
+        testvalue.handle_mode = handle_model.value
         return {"res": "success"}
-    period_client["handle_mode"].set_bool(reqbody.handle_mode)
+    period_client["handle_mode"].set_bool(handle_model.value)
     return {"res": "success"}
 
 
