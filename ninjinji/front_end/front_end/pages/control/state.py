@@ -115,7 +115,7 @@ class SlidersState(rx.State):
         if self.first:
             self.init_torque()
             self.first = False
-        return [self.torque]
+        return [self.aim_torque]
     
     @rx.var(cache=True)
     def get_max_torque(self) -> list[float]:
