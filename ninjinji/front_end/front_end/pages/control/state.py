@@ -103,12 +103,11 @@ class SlidersState(rx.State):
     max_torque: float = 4000.0
     first:bool = True
 
-    @rx.var(cache=True)
+    @rx.var(cache=False)
     def get_output_torque(self) -> list[float]:
         if self.first:
             self.init_torque()
             self.first = False
-        print(11111111,self.torque)
         return [self.torque]
     
     @rx.var(cache=True)
@@ -185,6 +184,7 @@ class SlidersState(rx.State):
             self.update_output_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
+            raise
         set_torque_lock["running"] = False
 
     @rx.event
@@ -217,11 +217,11 @@ class SlidersState(rx.State):
         if self.torque > max_torque:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
-                    f"http://{config['opcua-middleware']}/set-torque",
+                    f"http://{config['opcua-middleware']}/set-max-torque",
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     json={
-                        "aim_torque": {
-                            "torque": max_torque,
+                        "max_torque": {
+                            "torque": max_torque
                         }
                     },
                 )
@@ -441,10 +441,10 @@ class ControlDashboardState(rx.State):
                         headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     )
                     aim_torque_res.raise_for_status()
-                if not set_torque_lock['running']:
-                    async with self:
-                        siliderstate:SlidersState = await self.get_state(SlidersState)
-                        siliderstate.torque = float(aim_torque_res.json()["value"])
+                # if not set_torque_lock['running']:
+                #     async with self:
+                #         siliderstate:SlidersState = await self.get_state(SlidersState)
+                #         siliderstate.aim_torque = float(aim_torque_res.json()["value"])
             except Exception as e:
                 async with self:
                     self.actual_torque = -1.0
