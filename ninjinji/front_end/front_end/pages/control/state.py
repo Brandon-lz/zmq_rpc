@@ -69,7 +69,7 @@ class TorqueChartState(rx.State):
     data: List[Dict] = [
         {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, "amt": 2400},
     ]
-    pre_set_data:List[float] = [500,600,700,900,1500,2000,2500,3500,4500]
+    pre_set_data:List[float] = [500.,600.,700.,900.,1500.,2000.,2500.,3500.,4500.]
     pointer:int = 0
 
     def update_data(self, value:float):

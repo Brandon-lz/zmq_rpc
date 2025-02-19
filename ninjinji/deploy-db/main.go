@@ -54,6 +54,17 @@ func (User) TableName() string {
 	return "user"
 }
 
+
+type ProcessSet struct {
+	ID           uint      `gorm:"primaryKey;autoIncrement"`
+	Value string      `gorm:"column:values;"`
+	Created_at   time.Time `gorm:"column:created_at;"`
+}
+
+func (ProcessSet) TableName() string {
+	return "process_set"
+}
+
 func main() {
 	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{}, &gorm.Config{})
@@ -61,7 +72,7 @@ func main() {
 		panic(err)
 	}
 
-	err = db.AutoMigrate(&OperatorLogs{}, &System{}, &User{})
+	err = db.AutoMigrate(&OperatorLogs{}, &System{}, &User{}, &ProcessSet{})
 	if err != nil {
 		panic(err)
 	}
