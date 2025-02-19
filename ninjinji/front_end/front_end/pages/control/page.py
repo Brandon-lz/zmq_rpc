@@ -56,7 +56,7 @@ def index() -> rx.Component:
                     rx.avatar(fallback="自动", color_scheme="grass"),
                 ),
                 rx.spacer(width="0.5em"),
-                rx.switch(checked=HandleModeSwitchState.handle_mode, on_change=[HandleModeSwitchState.set_handle_mode_value], on_mount=HandleModeSwitchState.init_data),
+                rx.switch(checked=HandleModeSwitchState.handle_mode, on_change=HandleModeSwitchState.set_handle_mode_value, on_mount=HandleModeSwitchState.init_data),
             ),
             on_mount=ControlState.update_heartbeat_value,
             align="center",
