@@ -90,9 +90,6 @@ class TorqueChartState(rx.State):
 
     @rx.event
     def clear_data(self):
-        self._clear_data()
-    
-    def _clear_data(self):
         self.data = [{"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": 0, "实际扭矩": 0, "amt": 0}  for i in range(5)]
         self.pointer = 0
 
