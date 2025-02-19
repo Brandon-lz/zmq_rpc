@@ -48,7 +48,6 @@ async def get_value(node_name: str):
             result = testvalue.get_torque_value()
         elif node_name == "output_torque":
             result = testvalue.ouput_torque
-            print("2222222222get torque ",result)
         elif node_name == "aim_torque":
             result = testvalue.aim_torque
         elif node_name == "heartbeat":
@@ -83,7 +82,7 @@ class OutputTorque(BaseModel):
 
 @app.put("/set-torque")
 async def set_output_torque(output_torque: OutputTorque = Body(embed=True)):
-    print("1111111111set-torque", output_torque.torque)
+    print("set-torque", output_torque.torque)
     if dev_mode:
         testvalue.ouput_torque = output_torque.torque
         return {"res": "success"}
