@@ -100,6 +100,14 @@ period_client.register_opcvar(
 period_client.register_opcvar(
     MyNode(
         period_client.get_root_node().server,
+        nodeid=config["nodes"]["ouput-torque"]["node_id"],
+    ),
+    name="output_torque",
+)
+
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
         nodeid=config["nodes"]["handle-mode"]["node_id"],
     ),
     name="handle_mode",

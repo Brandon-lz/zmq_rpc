@@ -86,7 +86,7 @@ async def set_output_torque(output_torque: OutputTorque = Body(embed=True)):
     if dev_mode:
         testvalue.ouput_torque = output_torque.torque
         return {"res": "success"}
-    period_client["aim_torque"].set_real(output_torque.torque)      # 这里后面改
+    period_client["output_torque"].set_real(output_torque.torque)      # 这里后面改
     return {"res": "success"}
 
 class AimTorque(BaseModel):
