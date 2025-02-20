@@ -51,7 +51,7 @@ def index() -> rx.Component:
                 rx.heading("手自动模式: ",size="2"),
                 rx.spacer(width="0.5em"),
                 rx.cond(
-                    ~HandleModeSwitchState.handle_mode,
+                    HandleModeSwitchState.handle_mode,
                     rx.avatar(fallback="手动", color_scheme="orange"),
                     rx.avatar(fallback="自动", color_scheme="grass"),
                 ),
@@ -119,7 +119,7 @@ def index() -> rx.Component:
 
         rx.hstack(
             rx.cond(
-                HandleModeSwitchState.handle_mode,
+                ~HandleModeSwitchState.handle_mode,
                 rx.hstack(
                     rx.heading(f"设置目标扭矩: ",size="4",width="200px"),
                     rx.avatar(fallback=SlidersState.aim_torque_str),
