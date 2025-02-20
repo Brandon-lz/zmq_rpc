@@ -95,7 +95,7 @@ class TorqueChartState(rx.State):
 
 
 class SlidersState(rx.State):
-    torque: float = 0.7
+    torque: float = 0.7        # 这里是手动模式输出扭矩
     aim_torque: float = 0.7
     max_torque: float = 4000.0
     first:bool = True
