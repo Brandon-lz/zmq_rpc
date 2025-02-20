@@ -8,6 +8,6 @@ dependencies = [
     "pandas>=2.2.3",
     "pillow>=11.1.0",
     "psycopg2-binary>=2.9.10",
-    "reflex==0.6.8",
+    "reflex>=0.7.0",
     "websocket-client>=1.8.0",
 ]
