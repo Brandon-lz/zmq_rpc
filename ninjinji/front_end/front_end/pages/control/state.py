@@ -171,7 +171,7 @@ class SlidersState(rx.State):
        self.update_aim_torque()
        self.update_max_torque()
 
-    @rx.event
+    @rx.event(background=True)
     async def set_output_torque(self, value: list):
         set_torque_lock['running'] = True
         ouput_torque = float(value[0])
@@ -190,7 +190,9 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            self.update_output_torque()
+            async with self:
+                self.torque = ouput_torque
+            # self.update_output_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
             raise
@@ -204,8 +206,8 @@ class SlidersState(rx.State):
             aim_torque = self.max_torque
             yield  rx.toast.error(f"目标扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置",duration=1000)
         try:
+            # res = requests.put(
             async with httpx.AsyncClient() as aclient:
-                # res = requests.put(
                 res = await aclient.put(
                     f"http://{config['opcua-middleware']}/set-aim-torque",
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
@@ -223,7 +225,8 @@ class SlidersState(rx.State):
             print(f"Error setting torque: {e}")
         set_aimtorque_lock["running"] = False
     
-    @rx.event
+    # @rx.event
+    @rx.event(background=True)
     async def set_max_torque(self, value: list):
         max_torque = float(value[0])
         if self.torque > max_torque:
@@ -247,7 +250,9 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            self.init_torque()
+            async with self:
+                self.max_torque = float(value[0])
+            # self.init_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
         set_maxtorque_lock["running"] = False
