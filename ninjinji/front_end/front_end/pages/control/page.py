@@ -128,7 +128,7 @@ def index() -> rx.Component:
                         value=SlidersState.get_aim_torque,
                         min=0.0,
                         max=6000.0,
-                        on_change=SlidersState.set_aim_torque.throttle(200),
+                        on_change=SlidersState.set_aim_torque,
                     ),
                     rx.spacer(),
                     min_width = "600px",

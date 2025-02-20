@@ -80,9 +80,9 @@ async def torque_stop():
 class OutputTorque(BaseModel):
     torque: float
 
-@app.put("/set-torque")
+@app.put("/set-output-torque")
 async def set_output_torque(output_torque: OutputTorque = Body(embed=True)):
-    print("set-torque", output_torque.torque)
+    print("set-output-torque", output_torque.torque)
     if dev_mode:
         testvalue.ouput_torque = output_torque.torque
         return {"res": "success"}
