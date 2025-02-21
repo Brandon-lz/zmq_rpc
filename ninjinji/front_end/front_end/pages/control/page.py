@@ -129,6 +129,7 @@ def index() -> rx.Component:
                         min=0.0,
                         max=6000.0,
                         on_change=SlidersState.set_aim_torque,
+                        on_mount=SlidersState.reqeusts_values,
                     ),
                     rx.spacer(),
                     min_width = "600px",

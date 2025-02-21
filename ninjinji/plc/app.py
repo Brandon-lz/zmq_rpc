@@ -97,6 +97,7 @@ async def set_aim_torque(aim_torque: AimTorque = Body(embed=True)):
     print("set-aim-torque", aim_torque.torque)
     if dev_mode:
         testvalue.aim_torque = aim_torque.torque
+        print(111111111111111,testvalue.aim_torque)
         return {"res": "success"}
     period_client["aim_torque"].set_real(aim_torque.torque)
     return {"res": "success"}

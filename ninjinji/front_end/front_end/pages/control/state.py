@@ -15,6 +15,13 @@ import random
 import math
 import numpy as np
 
+from concurrent.futures import ThreadPoolExecutor
+executor = ThreadPoolExecutor(5)
+# future = executor.submit(task, ("Completed"))     # 开始执行任务
+
+import queue
+
+
 with open("config.json") as f:
     config = json.load(f)
 
@@ -30,6 +37,9 @@ send_heart_beat_running = {"running": False, "time": 0.0}
 
 update_torque_lock = Lock()
 update_torque_running = {"running": False, "time": 0.0}
+
+reqeusts_values_lock = Lock()
+reqeusts_values_running = {"running": False, "time": 0.0}
 
 
 set_torque_lock = {"running": False}
@@ -93,12 +103,20 @@ class TorqueChartState(rx.State):
         self.data = [{"timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "目标扭矩": 0, "实际扭矩": 0, "amt": 0}  for i in range(5)]
         self.pointer = 0
 
+# set_aim_torque_reqeust_to_do = queue.Queue()
+set_aim_torque_reqeust_lock = Lock()
 
 class SlidersState(rx.State):
     torque: float = 0.7        # 这里是手动模式输出扭矩
     aim_torque: float = 0.7
     max_torque: float = 4000.0
     first:bool = True
+
+    _n_tasks:int = 0
+
+    aim_torque_to_do_value:list = []
+    max_torque_to_do_value:list = []
+    output_torque_to_do_value:list = []
 
     @rx.var(cache=True)
     def torque_str(self)->str:
@@ -184,6 +202,11 @@ class SlidersState(rx.State):
         if ouput_torque>self.max_torque:
             ouput_torque = self.max_torque
             yield  rx.toast.error(f"输出扭矩不能大于最大扭矩，将按照最大扭矩{ouput_torque} N.m设置",duration=1000)
+        self.torque = ouput_torque
+        self.output_torque_to_do_value.append(ouput_torque)
+        set_torque_lock["running"] = False
+
+    async def set_output_torque_reqeust(self,output_torque:float):
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
@@ -191,18 +214,15 @@ class SlidersState(rx.State):
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     json={
                         "output_torque": {
-                            "torque": ouput_torque,
+                            "torque": output_torque,
                         }
                     },
                 )
                 res.raise_for_status()
-            async with self:
-                self.torque = ouput_torque
-            # self.update_output_torque()
+            await self.update_output_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
-            # raise
-        set_torque_lock["running"] = False
+
 
     @rx.event
     async def set_aim_torque(self, value: list):
@@ -213,8 +233,13 @@ class SlidersState(rx.State):
         if aim_torque>self.max_torque:
             aim_torque = self.max_torque
             yield  rx.toast.error(f"目标扭矩不能大于最大扭矩，将按照最大扭矩{aim_torque} N.m设置",duration=1000)
+        self.aim_torque = aim_torque
+        self.aim_torque_to_do_value.append(aim_torque)
+        set_aimtorque_lock["running"] = False
+
+    
+    async def set_aim_torque_reqeust(self,aim_torque:float):
         try:
-            # res = requests.put(
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
                     f"http://{config['opcua-middleware']}/set-aim-torque",
@@ -226,13 +251,10 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            # async with self:
-            self.aim_torque = aim_torque
-            # self.update_aim_torque()
+            await self.update_aim_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
-        set_aimtorque_lock["running"] = False
-    
+
     @rx.event
     async def set_max_torque(self, value: list):
         if set_maxtorque_lock["running"]:
@@ -246,7 +268,11 @@ class SlidersState(rx.State):
         #     await self._set_aim_torque([max_torque]).__anext__()
             yield SlidersState.set_aim_torque(value)
             yield  rx.toast.warning(f"目标扭矩超过当前设定的最大扭矩，将按照最大扭矩{max_torque} N.m 调整目标扭矩",duration=1000)
+        self.max_torque = float(value[0])
+        self.max_torque_to_do_value.append(self.max_torque)
+        set_maxtorque_lock["running"] = False
 
+    async def set_max_torque_reqeust(self,max_torque:float):
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
@@ -254,17 +280,64 @@ class SlidersState(rx.State):
                     headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     json={
                         "max_torque": {
-                            "torque": float(value[0]),
+                            "torque": max_torque,
                         }
                     },
                 )
                 res.raise_for_status()
-            async with self:
-                self.max_torque = float(value[0])
-            # self.init_torque()
+            await self.update_max_torque()
+
         except Exception as e:
             print(f"Error setting torque: {e}")
-        set_maxtorque_lock["running"] = False
+    
+
+    def stop_reqeusts_values(self):
+        reqeusts_values_running["running"]=False
+        self._n_tasks = 0
+
+    @rx.event(background=True)
+    async def reqeusts_values(self):
+        with reqeusts_values_lock:
+            reqeusts_values_running["time"] = time.time()
+            if reqeusts_values_running["running"]==True:
+                return
+            reqeusts_values_running["running"] = True
+
+        if self._n_tasks > 0:
+            return
+        async with self:  # 这是一个锁，不要在这里面sleep
+            self._n_tasks += 1
+
+        while True:
+            await asyncio.sleep(0.2)
+            if self._n_tasks == 0:
+                reqeusts_values_running["running"]=False
+                break
+            try:
+                if len(self.aim_torque_to_do_value)>0:
+                    async with self:
+                        value = self.aim_torque_to_do_value.pop()
+                        self.aim_torque_to_do_value.clear()
+                    async with self:
+                        await self.set_aim_torque_reqeust(value)
+                if len(self.max_torque_to_do_value)>0:
+                    async with self:
+                        value = self.max_torque_to_do_value.pop()
+                        self.max_torque_to_do_value.clear()
+                    async with self:
+                        await self.set_aim_torque_reqeust(value)
+                if len(self.output_torque_to_do_value)>0:
+                    async with self:
+                        value = self.output_torque_to_do_value.pop()
+                        self.output_torque_to_do_value.clear()
+                    async with self:
+                        await self.set_aim_torque_reqeust(value)
+                
+
+            except Exception as err:
+                print("ERROR: reqeusts_values background :",err)
+                
+
 
 
 class ControlState(rx.State):
@@ -384,6 +457,8 @@ class ControlState(rx.State):
         self._stop_update_value()
         controldashboardstate:ControlDashboardState = await self.get_state(ControlDashboardState)
         controldashboardstate.stop_update()
+        sliderstate:SlidersState = await self.get_state(SlidersState)
+        sliderstate.stop_reqeusts_values()
 
 
 def included_angle(a, b) -> float:
@@ -710,8 +785,6 @@ class StopButtonState(rx.State):
         #     return
         async with self:
             startstate: StartButtonState = await self.get_state(StartButtonState)
-            chartstate: TorqueChartState = await self.get_state(TorqueChartState)
-            # chartstate.clear_data()
             if startstate.start_button_text == "进行中":
                 startstate.start_button_text = "完成"
             startstate._runing = False
