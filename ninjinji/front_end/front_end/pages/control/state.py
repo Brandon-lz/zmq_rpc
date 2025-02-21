@@ -197,7 +197,7 @@ class SlidersState(rx.State):
             # self.update_output_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
-            raise
+            # raise
         set_torque_lock["running"] = False
 
     @rx.event(background=True)
