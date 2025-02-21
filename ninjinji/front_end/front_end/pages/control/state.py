@@ -315,13 +315,13 @@ class SlidersState(rx.State):
                         value = self.max_torque_to_do_value.pop()
                         self.max_torque_to_do_value.clear()
                     async with self:
-                        await self.set_aim_torque_reqeust(value)
+                        await self.set_max_torque_reqeust(value)
                 if len(self.output_torque_to_do_value)>0:
                     async with self:
                         value = self.output_torque_to_do_value.pop()
                         self.output_torque_to_do_value.clear()
                     async with self:
-                        await self.set_aim_torque_reqeust(value)
+                        await self.set_output_torque_reqeust(value)
                 
 
             except Exception as err:
