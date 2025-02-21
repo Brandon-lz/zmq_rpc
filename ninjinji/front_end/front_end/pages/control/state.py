@@ -133,7 +133,8 @@ class SlidersState(rx.State):
             self.first = False
         return [self.max_torque]
 
-    def update_output_torque(self):
+    @rx.event
+    async def update_output_torque(self):
         try:
             res = requests.get(
                 f"http://{config['opcua-middleware']}/getvalue/output_torque",
@@ -144,7 +145,8 @@ class SlidersState(rx.State):
         except Exception as e:
             print(f"获取输出扭矩失败: {e}")
 
-    def update_aim_torque(self):
+    @rx.event
+    async def update_aim_torque(self):
         try:
             res = requests.get(
                     f"http://{config['opcua-middleware']}/getvalue/aim_torque",
@@ -155,7 +157,8 @@ class SlidersState(rx.State):
         except Exception as e:
             print(f"获取目标扭矩失败: {e}")
 
-    def update_max_torque(self):
+    @rx.event
+    async def update_max_torque(self):
         try:
             res = requests.get(
                     f"http://{config['opcua-middleware']}/getvalue/max_torque",
@@ -166,12 +169,13 @@ class SlidersState(rx.State):
         except Exception as e:
             print(f"获取最大扭矩失败: {e}")
 
-    def init_torque(self):
-       self.update_output_torque()
-       self.update_aim_torque()
-       self.update_max_torque()
+    @rx.event
+    async def init_torque(self):
+       yield self.update_output_torque()
+       yield self.update_aim_torque()
+       yield self.update_max_torque()
 
-    @rx.event(background=True)
+    @rx.event
     async def set_output_torque(self, value: list):
         if set_torque_lock['running']:
             return
@@ -200,7 +204,7 @@ class SlidersState(rx.State):
             # raise
         set_torque_lock["running"] = False
 
-    @rx.event(background=True)
+    @rx.event
     async def set_aim_torque(self, value: list):
         if set_aimtorque_lock['running']:
             return
@@ -222,15 +226,14 @@ class SlidersState(rx.State):
                     },
                 )
                 res.raise_for_status()
-            async with self:
-                self.aim_torque = aim_torque
+            # async with self:
+            self.aim_torque = aim_torque
             # self.update_aim_torque()
         except Exception as e:
             print(f"Error setting torque: {e}")
         set_aimtorque_lock["running"] = False
     
-    # @rx.event
-    @rx.event(background=True)
+    @rx.event
     async def set_max_torque(self, value: list):
         if set_maxtorque_lock["running"]:
             return
