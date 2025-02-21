@@ -110,7 +110,6 @@ class SlidersState(rx.State):
     torque: float = 0.7        # 这里是手动模式输出扭矩
     aim_torque: float = 0.7
     max_torque: float = 4000.0
-    first:bool = True
 
     _n_tasks:int = 0
 
@@ -132,23 +131,14 @@ class SlidersState(rx.State):
 
     @rx.var(cache=False)
     def get_output_torque(self) -> list[float]:
-        if self.first:
-            self.init_torque()
-            self.first = False
         return [self.torque]
     
-    @rx.var(cache=True)
+    @rx.var(cache=False)
     def get_aim_torque(self) -> list[float]:
-        if self.first:
-            self.init_torque()
-            self.first = False
         return [self.aim_torque]
     
-    @rx.var(cache=True)
+    @rx.var(cache=False)
     def get_max_torque(self) -> list[float]:
-        if self.first:
-            self.init_torque()
-            self.first = False
         return [self.max_torque]
 
     @rx.event
@@ -189,9 +179,9 @@ class SlidersState(rx.State):
 
     @rx.event
     async def init_torque(self):
-       yield self.update_output_torque()
-       yield self.update_aim_torque()
-       yield self.update_max_torque()
+       yield SlidersState.update_output_torque()
+       yield SlidersState.update_aim_torque()
+       yield SlidersState.update_max_torque()
 
     @rx.event
     async def set_output_torque(self, value: list):
