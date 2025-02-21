@@ -173,6 +173,8 @@ class SlidersState(rx.State):
 
     @rx.event(background=True)
     async def set_output_torque(self, value: list):
+        if set_torque_lock['running']:
+            return
         set_torque_lock['running'] = True
         ouput_torque = float(value[0])
         if ouput_torque>self.max_torque:
@@ -200,6 +202,8 @@ class SlidersState(rx.State):
 
     @rx.event(background=True)
     async def set_aim_torque(self, value: list):
+        if set_aimtorque_lock['running']:
+            return
         set_aimtorque_lock['running'] = True
         aim_torque = float(value[0])
         if aim_torque>self.max_torque:
@@ -228,6 +232,9 @@ class SlidersState(rx.State):
     # @rx.event
     @rx.event(background=True)
     async def set_max_torque(self, value: list):
+        if set_maxtorque_lock["running"]:
+            return
+        set_maxtorque_lock['running'] = True
         max_torque = float(value[0])
         if self.torque > max_torque:
             yield SlidersState.set_output_torque(value)
@@ -237,7 +244,6 @@ class SlidersState(rx.State):
             yield SlidersState.set_aim_torque(value)
             yield  rx.toast.warning(f"目标扭矩超过当前设定的最大扭矩，将按照最大扭矩{max_torque} N.m 调整目标扭矩",duration=1000)
 
-        set_maxtorque_lock['running'] = True
         try:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.put(
