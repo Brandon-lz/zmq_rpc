@@ -113,6 +113,21 @@ period_client.register_opcvar(
     name="handle_mode",
 )
 
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["act-torque"]["node_id"],
+    ),
+    name="act_torque",
+)
+
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["torque-measure-value"]["node_id"],
+    ),
+    name="torque_measure_value",
+)
 
 print(period_client.opc_vars_names)
 

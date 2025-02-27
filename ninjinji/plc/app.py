@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, Body
 import asyncio
 from pydantic import BaseModel
-import math
+from typing import Tuple
 
 # dev mode
 import os
@@ -58,6 +58,13 @@ async def get_value(node_name: str):
             result = testvalue.max_torque
         return {"value": result}
     return {"value": period_client[node_name].get_value()}
+
+@app.get("/get-chart-torque-values")
+async def get_chart_torque_values():
+    #response:  [实际扭矩, 目标扭矩]
+    if dev_mode:
+        return {"values": [testvalue.get_torque_value()+float(random.randint(-10,10)), testvalue.get_torque_value()]}
+    return {"values": [period_client["torque_measure_value"].get_value(), period_client["act_torque"].get_value()]}
 
 
 @app.put("/torque-start")

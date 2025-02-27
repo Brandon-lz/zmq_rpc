@@ -58,7 +58,6 @@ class HandleModeSwitchState(rx.State):
             )
         res.raise_for_status()
         self.handle_mode = bool(res.json()["value"])
-        print(1111111111111111,self.handle_mode)
 
     @rx.event
     async def set_handle_mode_value(self, value: bool):
@@ -74,7 +73,6 @@ class HandleModeSwitchState(rx.State):
             )
             res.raise_for_status()
         self.handle_mode = value
-        print(22222222222222222,self.handle_mode)
 
 
 class TorqueChartState(rx.State):
@@ -84,14 +82,18 @@ class TorqueChartState(rx.State):
     pre_set_data:List[float] = [500.,600.,700.,900.,1500.,2000.,2500.,3500.,4500.]
     pointer:int = 0
 
-    def update_data(self, value:float):
+    def update_data(self, value:List[float]):       
+        """
+        value:list[float,float]: [实际扭矩, 目标扭矩]
+        """
         if len(self.data) < self.pointer+1:
             self.data.append(
-                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": value, "amt": 800},
+                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": value[0], "amt": 800},
             )
-        else:
-            self.data[self.pointer]["实际扭矩"] = value
-            self.data[self.pointer]["目标扭矩"] = self.pre_set_data[self.pointer]
+        # else:
+        self.data[self.pointer]["实际扭矩"] = value[0]
+            # self.data[self.pointer]["目标扭矩"] = self.pre_set_data[self.pointer]
+        self.data[self.pointer]["目标扭矩"] = value[1]
         self.pointer += 1
         
 
@@ -728,11 +730,18 @@ class StartButtonState(rx.State):
             torqueChartstate :TorqueChartState = await self.get_state(TorqueChartState)
             torqueChartstate.clear_data()
         while True:
+            async with httpx.AsyncClient() as aclient:
+                res = await aclient.put(
+                    f"http://{config['opcua-middleware']}/get-chart-torque-values",
+                )
+                res.raise_for_status()
+            chart_new_value:List[float] = res.json()["values"]
+
             async with self:
                 # Check for stopping conditions inside context
                 # 实时更新扭力值
                 self.process_count = controldashstate.actual_torque
-                torqueChartstate.update_data(controldashstate.actual_torque)
+                torqueChartstate.update_data(chart_new_value)
 
                 if not self._runing or self.process_count >= self.process_max:
                     self.start_button_text = "完成"
