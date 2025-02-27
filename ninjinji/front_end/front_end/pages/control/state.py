@@ -684,7 +684,11 @@ class StartButtonState(rx.State):
     async def on_click(self):
         # 初始化逻辑必须写在这里面
         async with self:
-
+            handle_switch_state:HandleModeSwitchState = await self.get_state(HandleModeSwitchState)
+            if handle_switch_state.handle_mode!=False:
+                yield  rx.toast.error(f"当前模式不支持，请切换到自动模式",duration=1000)
+                return
+            del handle_switch_state
             # only allow 1 concurrent task
             if self._runing:
                 return
@@ -812,6 +816,14 @@ class JogAddButtonState(rx.State):
     @rx.event(background=True)
     async def on_pressed(self):
         async with self:
+            # 检查是否为自动模式
+            handle_switch_state:HandleModeSwitchState = await self.get_state(HandleModeSwitchState)
+            if handle_switch_state.handle_mode!=False:
+                yield  rx.toast.error(f"当前模式不支持，请切换到自动模式",duration=1000)
+                self._running = False
+                return
+            del handle_switch_state
+
             if self._running:
                 return
             self._running = True
@@ -858,6 +870,14 @@ class JogSubButtonState(rx.State):
     @rx.event(background=True)
     async def on_pressed(self):
         async with self:
+            # 检查是否为自动模式
+            handle_switch_state:HandleModeSwitchState = await self.get_state(HandleModeSwitchState)
+            if handle_switch_state.handle_mode!=False:
+                yield  rx.toast.error(f"当前模式不支持，请切换到自动模式",duration=1000)
+                self._running = False
+                return
+            del handle_switch_state
+
             if self._running:
                 return
             self._running = True
