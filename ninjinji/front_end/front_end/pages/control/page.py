@@ -121,20 +121,6 @@ def index() -> rx.Component:
             rx.cond(
                 HandleModeSwitchState.handle_mode,
                 rx.hstack(
-                    rx.heading(f"设置目标扭矩: ",size="4",width="200px"),
-                    rx.avatar(fallback=SlidersState.aim_torque_str),
-                    rx.heading(f"N.m",size="4"),
-                    rx.slider(
-                        value=SlidersState.get_aim_torque,
-                        min=0.0,
-                        max=6000.0,
-                        on_change=SlidersState.set_aim_torque,
-                    ),
-                    rx.spacer(),
-                    min_width = "600px",
-                    align="center",
-                ),
-                rx.hstack(
                     rx.heading(f"设置输出扭矩: ",size="4",width="200px"),
                     rx.avatar(fallback=SlidersState.torque_str),
                     rx.heading(f"N.m",size="4"),
@@ -143,6 +129,20 @@ def index() -> rx.Component:
                         min=0.0,
                         max=6000.0,
                         on_change=SlidersState.set_output_torque,
+                    ),
+                    rx.spacer(),
+                    min_width = "600px",
+                    align="center",
+                ),
+                rx.hstack(
+                    rx.heading(f"设置目标扭矩: ",size="4",width="200px"),
+                    rx.avatar(fallback=SlidersState.aim_torque_str),
+                    rx.heading(f"N.m",size="4"),
+                    rx.slider(
+                        value=SlidersState.get_aim_torque,
+                        min=0.0,
+                        max=6000.0,
+                        on_change=SlidersState.set_aim_torque,
                     ),
                     rx.spacer(),
                     min_width = "600px",
