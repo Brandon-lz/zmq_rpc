@@ -67,17 +67,17 @@ class HandleModeSwitchState(rx.State):
                 headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                 json={
                     "handle_model": {
-                        "value": value
+                        "value": not value
                     }
                 },
             )
             res.raise_for_status()
-        self.handle_mode = value
+        self.handle_mode = not value
 
 
 class TorqueChartState(rx.State):
     data: List[Dict] = [
-        {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, "amt": 2400},
+        {"timestamp": "2025-01-20 14:23:28", "目标扭矩": 0, "实际扭矩": 0, },
     ]
     pre_set_data:List[float] = [500.,600.,700.,900.,1500.,2000.,2500.,3500.,4500.]
     pointer:int = 0
@@ -88,7 +88,7 @@ class TorqueChartState(rx.State):
         """
         if len(self.data) < self.pointer+1:
             self.data.append(
-                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": value[0], "amt": 800},
+                {"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "目标扭矩": None, "实际扭矩": value[0]},
             )
         # else:
         self.data[self.pointer]["实际扭矩"] = value[0]
@@ -731,7 +731,7 @@ class StartButtonState(rx.State):
             torqueChartstate.clear_data()
         while True:
             async with httpx.AsyncClient() as aclient:
-                res = await aclient.put(
+                res = await aclient.get(
                     f"http://{config['opcua-middleware']}/get-chart-torque-values",
                 )
                 res.raise_for_status()
