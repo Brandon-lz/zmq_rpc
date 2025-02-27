@@ -58,6 +58,7 @@ class HandleModeSwitchState(rx.State):
             )
         res.raise_for_status()
         self.handle_mode = bool(res.json()["value"])
+        print(1111111111111111,self.handle_mode)
 
     @rx.event
     async def set_handle_mode_value(self, value: bool):
@@ -73,6 +74,7 @@ class HandleModeSwitchState(rx.State):
             )
             res.raise_for_status()
         self.handle_mode = value
+        print(22222222222222222,self.handle_mode)
 
 
 class TorqueChartState(rx.State):
