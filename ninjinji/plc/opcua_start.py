@@ -129,6 +129,22 @@ period_client.register_opcvar(
     name="torque_measure_value",
 )
 
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["torque-measure-value"]["node_id"],
+    ),
+    name="torque_measure_value",
+)
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["torque-current-set-value"]["node_id"],
+    ),
+    name="torque_current_set_value",
+)
+
+
 print(period_client.opc_vars_names)
 
 print("PLC READY")

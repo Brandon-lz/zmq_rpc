@@ -38,5 +38,8 @@ node_id = "ns=4;i=25"
 [nodes.act-torque]
 node_id = "ns=4;i=30"
 
-[nodes.torque_measure_value]
+[nodes.torque-measure-value]
 node_id = "ns=4;i=29"
+
+[nodes.torque-current-set-value]
+node_id = "ns=4;i=31"
