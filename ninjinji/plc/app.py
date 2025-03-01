@@ -65,7 +65,7 @@ async def get_chart_torque_values():
     if dev_mode:
         return {"values": [testvalue.get_torque_value()+float(random.randint(-10,10)), testvalue.get_torque_value()]}
     # return {"values": [period_client["torque_measure_value"].get_value(), period_client["torque_current_set_value"].get_value()]}
-    return {"values": [period_client["torque_value"].get_value(), period_client["torque_set_output"].get_value()]}
+    return {"values": [period_client["torque_feedback"].get_value(), period_client["torque_set_output"].get_value()]}
 
 
 @app.put("/torque-start")
