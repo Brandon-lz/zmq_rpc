@@ -706,7 +706,6 @@ class StartButtonState(rx.State):
                         headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
                     )
                     res.raise_for_status()
-                    self.process_max = float(res.json()["value"])
                 return
 
             # State mutation is only allowed inside context block
@@ -740,6 +739,7 @@ class StartButtonState(rx.State):
             controldashstate :ControlDashboardState = await self.get_state(ControlDashboardState)
             torqueChartstate :TorqueChartState = await self.get_state(TorqueChartState)
             torqueChartstate.clear_data()
+        finished_count = 0
         while True:
             async with httpx.AsyncClient() as aclient:
                 res = await aclient.get(
@@ -748,6 +748,8 @@ class StartButtonState(rx.State):
                 res.raise_for_status()
             chart_new_value:List[float] = res.json()["values"]
             is_finished:bool = res.json()["is_finished"]
+            if is_finished:
+                finished_count += 1 
 
             async with self:
                 # Check for stopping conditions inside context
@@ -756,7 +758,7 @@ class StartButtonState(rx.State):
                 torqueChartstate.update_data(chart_new_value)
 
                 # if not self._runing or self.process_count >= self.process_max:
-                if not self._runing or is_finished:
+                if not self._runing or finished_count>=70:
                     self.start_button_text = "完成"
                     self._runing = False
                     return
