@@ -758,7 +758,7 @@ class StartButtonState(rx.State):
                 torqueChartstate.update_data(chart_new_value)
 
                 # if not self._runing or self.process_count >= self.process_max:
-                if not self._runing or finished_count>=20:
+                if not self._runing or finished_count>=10:
                     self.start_button_text = "完成"
                     self._runing = False
                     return
