@@ -136,12 +136,23 @@ period_client.register_opcvar(
     ),
     name="torque_measure_value",
 )
+
+# global_vars.torque_set
 period_client.register_opcvar(
     MyNode(
         period_client.get_root_node().server,
         nodeid=config["nodes"]["torque-current-set-value"]["node_id"],
     ),
     name="torque_current_set_value",
+)
+
+# global_vars.torque_set_output
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["torque-set-output"]["node_id"],
+    ),
+    name="torque_set_output",
 )
 
 

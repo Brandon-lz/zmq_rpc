@@ -20,7 +20,7 @@ node_id = "ns=4;i=18"
 [nodes.node-stop]
 node_id = "ns=4;i=19"
 
-[nodes.torque-value]
+[nodes.torque-value]             # mes.torque_value
 node_id = "ns=4;i=23"
 
 [nodes.aim-torque]
@@ -43,3 +43,6 @@ node_id = "ns=4;i=29"
 
 [nodes.torque-current-set-value]
 node_id = "ns=4;i=31"
+
+[nodes.torque-set-output]
+node_id = "ns=4;i=32"
