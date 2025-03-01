@@ -700,6 +700,13 @@ class StartButtonState(rx.State):
                 chart_state.clear_data()
                 self.start_button_text = "开始"
                 self.process_count = self.process_min
+                async with httpx.AsyncClient() as aclient:
+                    res = await aclient.put(
+                        f"http://{config['opcua-middleware']}/torque-finish-ack",
+                        headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                    )
+                    res.raise_for_status()
+                    self.process_max = float(res.json()["value"])
                 return
 
             # State mutation is only allowed inside context block
@@ -740,6 +747,7 @@ class StartButtonState(rx.State):
                 )
                 res.raise_for_status()
             chart_new_value:List[float] = res.json()["values"]
+            is_finished:bool = res.json()["is_finished"]
 
             async with self:
                 # Check for stopping conditions inside context
@@ -747,7 +755,8 @@ class StartButtonState(rx.State):
                 self.process_count = controldashstate.actual_torque
                 torqueChartstate.update_data(chart_new_value)
 
-                if not self._runing or self.process_count >= self.process_max:
+                # if not self._runing or self.process_count >= self.process_max:
+                if not self._runing or is_finished:
                     self.start_button_text = "完成"
                     self._runing = False
                     return

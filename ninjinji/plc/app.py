@@ -65,7 +65,7 @@ async def get_chart_torque_values():
     if dev_mode:
         return {"values": [testvalue.get_torque_value()+float(random.randint(-10,10)), testvalue.get_torque_value()]}
     # return {"values": [period_client["torque_measure_value"].get_value(), period_client["torque_current_set_value"].get_value()]}
-    return {"values": [period_client["torque_feedback"].get_value(), period_client["torque_set_output"].get_value()]}
+    return {"values": [period_client["torque_feedback"].get_value(), period_client["torque_set_output"].get_value()],"is_finished":period_client["torque_finished"].get_value()}
 
 
 @app.put("/torque-start")
@@ -76,6 +76,21 @@ async def torque_start():
     period_client["start"].set_bool(True)
     return {"res": "success"}
 
+# @app.get("/is-finished")
+# async def isfinished():
+#     if dev_mode:
+#         return {"res":True}
+#     # return {"values": [period_client["torque_measure_value"].get_value(), period_client["torque_current_set_value"].get_value()]}
+#     return {"res": period_client["torque_finished"].get_value()}
+
+
+@app.put("/torque-finish-ack")
+async def torque_finish_ack():
+    print("torque finish ack")
+    if dev_mode:
+        return {"res": "success"}
+    period_client["torque_finished"].set_bool(False)
+    return {"res": "success"}
 
 @app.put("/torque-stop")
 async def torque_stop():

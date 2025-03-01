@@ -49,3 +49,6 @@ node_id = "ns=4;i=32"
 
 [nodes.torque-feedback]
 node_id = "ns=4;i=33"
+
+[nodes.torque-finished]
+node_id = "ns=4;i=34"

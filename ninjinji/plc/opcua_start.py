@@ -164,6 +164,14 @@ period_client.register_opcvar(
     name="torque_feedback",
 )
 
+# global_vars.torque_finished
+period_client.register_opcvar(
+    MyNode(
+        period_client.get_root_node().server,
+        nodeid=config["nodes"]["torque-finished"]["node_id"],
+    ),
+    name="torque_finished",
+)
 
 
 print(period_client.opc_vars_names)
